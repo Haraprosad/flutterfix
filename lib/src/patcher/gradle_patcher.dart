@@ -24,6 +24,13 @@ class GradlePatcher {
     }
 
     try {
+      // Create backup before modifying
+      await FileUtils.createBackup(
+        projectPath,
+        wrapperProps,
+        'Gradle wrapper update to version $version',
+      );
+
       final distributionUrl =
           'https://services.gradle.org/distributions/gradle-$version-bin.zip';
 
@@ -44,7 +51,8 @@ class GradlePatcher {
     final gradleProps = p.join(projectPath, 'android', 'gradle.properties');
 
     final optimizations = {
-      'org.gradle.jvmargs': '-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError',
+      'org.gradle.jvmargs':
+          '-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError',
       'org.gradle.parallel': 'true',
       'org.gradle.caching': 'true',
       'org.gradle.configureondemand': 'true',
@@ -55,6 +63,12 @@ class GradlePatcher {
     try {
       String content = '';
       if (FileUtils.fileExists(gradleProps)) {
+        // Create backup before modifying
+        await FileUtils.createBackup(
+          projectPath,
+          gradleProps,
+          'Gradle properties optimization',
+        );
         content = await FileUtils.readFile(gradleProps);
       }
 
@@ -90,16 +104,18 @@ class GradlePatcher {
       var content = await FileUtils.readFile(buildGradle);
 
       // Check if repositories block exists in buildscript
-      if (!content.contains('repositories') || 
-          !content.contains('google()') || 
+      if (!content.contains('repositories') ||
+          !content.contains('google()') ||
           !content.contains('mavenCentral()')) {
-        
         // Add repositories if missing
         if (content.contains('buildscript {')) {
           final buildscriptStart = content.indexOf('buildscript {');
           final buildscriptEnd = content.indexOf('}', buildscriptStart);
-          
-          if (buildscriptEnd != -1 && !content.substring(buildscriptStart, buildscriptEnd).contains('repositories')) {
+
+          if (buildscriptEnd != -1 &&
+              !content
+                  .substring(buildscriptStart, buildscriptEnd)
+                  .contains('repositories')) {
             content = content.replaceFirst(
               'buildscript {',
               '''buildscript {
@@ -195,4 +211,3 @@ allprojects {
     }
   }
 }
-

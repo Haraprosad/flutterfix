@@ -1,5 +1,43 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:path/path.dart' as p;
+
+/// Backup information model
+class BackupInfo {
+  final String id;
+  final DateTime timestamp;
+  final String originalPath;
+  final String backupPath;
+  final String description;
+  final String projectPath;
+
+  BackupInfo({
+    required this.id,
+    required this.timestamp,
+    required this.originalPath,
+    required this.backupPath,
+    required this.description,
+    required this.projectPath,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'timestamp': timestamp.toIso8601String(),
+        'originalPath': originalPath,
+        'backupPath': backupPath,
+        'description': description,
+        'projectPath': projectPath,
+      };
+
+  factory BackupInfo.fromJson(Map<String, dynamic> json) => BackupInfo(
+        id: json['id'] as String,
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        originalPath: json['originalPath'] as String,
+        backupPath: json['backupPath'] as String,
+        description: json['description'] as String,
+        projectPath: json['projectPath'] as String,
+      );
+}
 
 class FileUtils {
   /// Check if a file exists
@@ -111,6 +149,133 @@ class FileUtils {
     final backupPath = '$path.backup.$timestamp';
     await copyFile(path, backupPath);
     return backupPath;
+  }
+
+  /// Create backup with metadata
+  static Future<BackupInfo> createBackup(
+    String projectPath,
+    String filePath,
+    String description,
+  ) async {
+    final timestamp = DateTime.now();
+    final backupDir = await getBackupDirectory(projectPath);
+    await ensureDir(backupDir);
+
+    // Create backup metadata
+    final backupId = timestamp.millisecondsSinceEpoch.toString();
+    final relativePath = p.relative(filePath, from: projectPath);
+    final backupFileName = '${p.basename(filePath)}.backup.$backupId';
+    final backupFilePath = p.join(backupDir, backupFileName);
+
+    // Copy file to backup location
+    await copyFile(filePath, backupFilePath);
+
+    // Create metadata file
+    final metadata = BackupInfo(
+      id: backupId,
+      timestamp: timestamp,
+      originalPath: relativePath,
+      backupPath: backupFilePath,
+      description: description,
+      projectPath: projectPath,
+    );
+
+    await _saveBackupMetadata(backupDir, metadata);
+
+    return metadata;
+  }
+
+  /// Get backup directory for project
+  static Future<String> getBackupDirectory(String projectPath) async {
+    return p.join(projectPath, '.flutterfix', 'backups');
+  }
+
+  /// Save backup metadata
+  static Future<void> _saveBackupMetadata(
+    String backupDir,
+    BackupInfo metadata,
+  ) async {
+    final metadataPath = p.join(backupDir, 'metadata.json');
+
+    List<Map<String, dynamic>> allMetadata = [];
+
+    if (fileExists(metadataPath)) {
+      final content = await readFile(metadataPath);
+      final decoded = content.isNotEmpty
+          ? (jsonDecode(content) as List).cast<Map<String, dynamic>>()
+          : <Map<String, dynamic>>[];
+      allMetadata = decoded;
+    }
+
+    allMetadata.add(metadata.toJson());
+    await writeFile(metadataPath, jsonEncode(allMetadata));
+  }
+
+  /// List all backups for a project
+  static Future<List<BackupInfo>> listBackups(String projectPath) async {
+    final backupDir = await getBackupDirectory(projectPath);
+    final metadataPath = p.join(backupDir, 'metadata.json');
+
+    if (!fileExists(metadataPath)) {
+      return [];
+    }
+
+    final content = await readFile(metadataPath);
+    if (content.isEmpty) return [];
+
+    final decoded = (jsonDecode(content) as List).cast<Map<String, dynamic>>();
+    return decoded.map((json) => BackupInfo.fromJson(json)).toList()
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  }
+
+  /// Get latest backup
+  static Future<BackupInfo?> getLatestBackup(String projectPath) async {
+    final backups = await listBackups(projectPath);
+    return backups.isEmpty ? null : backups.first;
+  }
+
+  /// Restore a backup
+  static Future<void> restoreBackup(BackupInfo backup) async {
+    final originalPath = p.join(backup.projectPath, backup.originalPath);
+
+    // Ensure parent directory exists
+    final parentDir = p.dirname(originalPath);
+    await ensureDir(parentDir);
+
+    // Restore the file
+    await copyFile(backup.backupPath, originalPath);
+  }
+
+  /// Delete a backup
+  static Future<void> deleteBackup(
+    String projectPath,
+    BackupInfo backup,
+  ) async {
+    // Delete backup file
+    if (fileExists(backup.backupPath)) {
+      await File(backup.backupPath).delete();
+    }
+
+    // Update metadata
+    final backupDir = await getBackupDirectory(projectPath);
+    final metadataPath = p.join(backupDir, 'metadata.json');
+
+    if (fileExists(metadataPath)) {
+      final content = await readFile(metadataPath);
+      final decoded =
+          (jsonDecode(content) as List).cast<Map<String, dynamic>>();
+      final filtered =
+          decoded.where((json) => json['id'] != backup.id).toList();
+      await writeFile(metadataPath, jsonEncode(filtered));
+    }
+  }
+
+  /// Clear all backups for a project
+  static Future<void> clearAllBackups(String projectPath) async {
+    final backupDir = await getBackupDirectory(projectPath);
+    if (dirExists(backupDir)) {
+      await deleteDir(backupDir);
+    }
   }
 
   /// Get file size in bytes

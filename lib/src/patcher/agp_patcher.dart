@@ -12,6 +12,13 @@ class AgpPatcher {
     if (!FileUtils.fileExists(buildGradle)) return false;
 
     try {
+      // Create backup before modifying
+      await FileUtils.createBackup(
+        projectPath,
+        buildGradle,
+        'AGP (Android Gradle Plugin) update to version $version',
+      );
+
       var content = await FileUtils.readFile(buildGradle);
 
       // Pattern 1: classpath 'com.android.tools.build:gradle:x.x.x'

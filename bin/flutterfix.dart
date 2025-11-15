@@ -32,6 +32,29 @@ void main(List<String> arguments) async {
             negatable: false,
             help: 'Install without using FVM (standalone)',
           ))
+    ..addCommand(
+        'rollback',
+        ArgParser()
+          ..addFlag(
+            'list',
+            abbr: 'l',
+            negatable: false,
+            help: 'List all available backups',
+          )
+          ..addOption(
+            'id',
+            help: 'Restore specific backup by ID',
+          )
+          ..addFlag(
+            'latest',
+            negatable: false,
+            help: 'Restore the most recent backup',
+          )
+          ..addFlag(
+            'clear',
+            negatable: false,
+            help: 'Clear all backups',
+          ))
     ..addFlag(
       'help',
       abbr: 'h',
@@ -121,6 +144,18 @@ Future<void> _executeCommand(
       await installCmd.execute();
       break;
 
+    case 'rollback':
+      final rollbackCmd = RollbackCommand(
+        logger,
+        projectPath,
+        listOnly: command['list'] as bool,
+        backupId: command['id'] as String?,
+        latest: command['latest'] as bool,
+        clearAll: command['clear'] as bool,
+      );
+      await rollbackCmd.execute();
+      break;
+
     default:
       print('Unknown command: ${command.name}');
       exit(1);
@@ -145,6 +180,7 @@ COMMANDS:
   doctor      Diagnose project issues (non-destructive)
   sync        Fix all detected issues (default)
   install     Install compatible Flutter version
+  rollback    Restore files from backups
   upgrade     Update FlutterFix to latest version
 
 OPTIONS:
@@ -168,6 +204,15 @@ EXAMPLES:
 
   # Install specific Flutter version
   flutterfix install --version 3.24
+
+  # Undo last changes (restore from backup)
+  flutterfix rollback
+
+  # List all backups
+  flutterfix rollback --list
+
+  # Restore latest backup
+  flutterfix rollback --latest
 
   # Fix a specific project
   flutterfix --path /path/to/project

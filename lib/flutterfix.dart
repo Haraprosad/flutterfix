@@ -5,6 +5,7 @@ export 'src/cli/doctor_command.dart';
 export 'src/cli/sync_command.dart';
 export 'src/cli/upgrade_command.dart';
 export 'src/cli/install_command.dart';
+export 'src/cli/rollback_command.dart';
 
 // Detectors
 export 'src/detect/flutter_detector.dart';

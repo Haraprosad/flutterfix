@@ -123,6 +123,21 @@ flutterfix install --version 3.24
 flutterfix doctor
 ```
 
+**Rollback changes (restore from backup):**
+```bash
+flutterfix rollback
+```
+
+**List all backups:**
+```bash
+flutterfix rollback --list
+```
+
+**Restore latest backup:**
+```bash
+flutterfix rollback --latest
+```
+
 **Upgrade FlutterFix:**
 ```bash
 flutterfix upgrade
@@ -132,6 +147,41 @@ flutterfix upgrade
 ```bash
 flutterfix --help
 ```
+
+### Rollback & Backup System
+
+FlutterFix automatically creates backups before modifying any files. You can easily restore previous versions:
+
+**Undo last changes (interactive):**
+```bash
+flutterfix rollback
+```
+
+**List all backups:**
+```bash
+flutterfix rollback --list
+```
+
+**Restore most recent backup:**
+```bash
+flutterfix rollback --latest
+```
+
+**Restore specific backup by ID:**
+```bash
+flutterfix rollback --id <backup-id>
+```
+
+**Clear all backups:**
+```bash
+flutterfix rollback --clear
+```
+
+Backups are stored in `.flutterfix/backups/` directory within your project. Each backup includes:
+- Original file path
+- Timestamp
+- Description of changes
+- Unique backup ID
 
 ---
 
@@ -143,6 +193,7 @@ flutterfix --help
 | � **Flutter Auto-Install** | Installs compatible Flutter version using FVM or standalone |
 | �🔄 **Compatibility Matrix** | Uses tested compatibility mappings for seamless fixes |
 | 📝 **Auto-Configuration** | Updates `build.gradle`, `gradle-wrapper.properties`, and SDK settings |
+| 🔙 **Automatic Backups** | Creates backups before making changes - rollback anytime |
 | 🧹 **Cache Cleaning** | Removes stale build artifacts that cause issues |
 | 📊 **Detailed Reports** | Shows what was fixed and what needs attention |
 | 💡 **Zero Config** | Works out of the box with sensible defaults |
@@ -181,6 +232,13 @@ flutterfix --help
 - Uses FVM (Flutter Version Management) for easy switching
 - Supports standalone installations
 - Lists available Flutter versions
+
+### 7. Backup & Rollback System
+- **Automatic backups** before any file modifications
+- Restore files to previous state with one command
+- List all available backups with timestamps
+- Clear old backups to save space
+- Backup metadata includes descriptions and timestamps
 
 ---
 

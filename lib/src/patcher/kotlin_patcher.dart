@@ -12,6 +12,13 @@ class KotlinPatcher {
     if (!FileUtils.fileExists(buildGradle)) return false;
 
     try {
+      // Create backup before modifying
+      await FileUtils.createBackup(
+        projectPath,
+        buildGradle,
+        'Kotlin version update to $version',
+      );
+
       var content = await FileUtils.readFile(buildGradle);
 
       // Update ext.kotlin_version
