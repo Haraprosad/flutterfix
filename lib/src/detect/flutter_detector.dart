@@ -63,7 +63,8 @@ class FlutterDetector {
     try {
       // Parse JSON output
       final output = result.stdout;
-      final versionMatch = RegExp(r'Flutter\s+(\d+\.\d+\.\d+)').firstMatch(output);
+      final versionMatch =
+          RegExp(r'Flutter\s+(\d+\.\d+\.\d+)').firstMatch(output);
       final dartMatch = RegExp(r'Dart\s+(\d+\.\d+\.\d+)').firstMatch(output);
       final channelMatch = RegExp(r'channel\s+(\w+)').firstMatch(output);
 
@@ -80,7 +81,8 @@ class FlutterDetector {
   }
 
   static FlutterInfo _parseHumanReadable(String output) {
-    final versionMatch = RegExp(r'Flutter\s+(\d+\.\d+\.\d+)').firstMatch(output);
+    final versionMatch =
+        RegExp(r'Flutter\s+(\d+\.\d+\.\d+)').firstMatch(output);
     final dartMatch = RegExp(r'Dart\s+(\d+\.\d+\.\d+)').firstMatch(output);
     final channelMatch = RegExp(r'channel\s+(\w+)').firstMatch(output);
 
@@ -93,7 +95,8 @@ class FlutterDetector {
   }
 
   /// Detect Flutter configuration from project
-  static Future<ProjectFlutterInfo> detectFromProject(String projectPath) async {
+  static Future<ProjectFlutterInfo> detectFromProject(
+      String projectPath) async {
     final pubspecPath = p.join(projectPath, 'pubspec.yaml');
 
     if (!FileUtils.fileExists(pubspecPath)) {
@@ -157,4 +160,3 @@ class FlutterDetector {
     return match?.group(1);
   }
 }
-

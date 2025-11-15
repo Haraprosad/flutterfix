@@ -4,6 +4,8 @@
 > Automatically fixes Flutter, Gradle, Kotlin, and Java version conflicts with a single command.
 
 [![Pub Version](https://img.shields.io/pub/v/flutterfix?color=blue)](https://pub.dev/packages/flutterfix)
+[![CI](https://github.com/haraprosad/flutterfix/workflows/CI/badge.svg)](https://github.com/haraprosad/flutterfix/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/haraprosad/flutterfix/branch/main/graph/badge.svg)](https://codecov.io/gh/haraprosad/flutterfix)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/haraprosad/flutterfix/pulls)
 
@@ -310,6 +312,53 @@ You can now run: flutter run
 | 3.10.x | 7.3 | 7.1.0 | 1.6.10 | 11+ | 21 | 32 |
 | 3.7.x | 7.2 | 7.0.0 | 1.6.0 | 11+ | 21 | 31 |
 | 3.3.x | 6.7 | 4.1.0 | 1.5.31 | 11+ | 21 | 30 |
+
+---
+
+## 🚀 CI/CD Integration
+
+FlutterFix can be integrated into your CI/CD pipeline to automatically fix version conflicts.
+
+### GitHub Actions
+
+Add FlutterFix to your GitHub Actions workflow:
+
+```yaml
+name: Flutter CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
+      - name: Install FlutterFix
+        run: dart pub global activate flutterfix
+      
+      - name: Fix version conflicts
+        run: flutterfix sync
+      
+      - name: Run tests
+        run: flutter test
+```
+
+For more examples, see `examples/ci-cd/` directory.
+
+### Benefits in CI/CD
+
+- ✅ **Automatic version fixing** - No manual intervention needed
+- ✅ **Consistent builds** - Same configuration across all environments
+- ✅ **Catch issues early** - Detect conflicts before merging
+- ✅ **Zero configuration** - Works out of the box
+- ✅ **Fast execution** - Completes in seconds
 
 ---
 
