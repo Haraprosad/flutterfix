@@ -52,6 +52,7 @@ jobs:
 
       - name: Run tests
         run: dart test
+        timeout-minutes: 5
 
   integration-test:
     name: Integration Test

@@ -2,12 +2,14 @@ name: FlutterFix - Auto-fix Flutter Projects
 
 # This workflow can be used in any Flutter project's CI/CD pipeline
 # to automatically fix Flutter, Gradle, Kotlin, and Java version conflicts
+# NOTE: Disabled until FlutterFix is published to pub.dev
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  # Uncomment after publishing to pub.dev
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -36,15 +38,15 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Install FlutterFix
-        run: dart pub global activate flutterfix
+      - name: Install FlutterFix dependencies
+        run: dart pub get
 
       - name: Run FlutterFix Doctor
-        run: flutterfix doctor
+        run: dart run bin/flutterfix.dart doctor
         continue-on-error: true
 
       - name: Run FlutterFix Sync
-        run: flutterfix sync
+        run: dart run bin/flutterfix.dart sync
 
       - name: Verify fixes
         run: |
@@ -74,13 +76,13 @@ jobs:
         with:
           sdk: stable
 
-      - name: Install FlutterFix
-        run: dart pub global activate flutterfix
+      - name: Install FlutterFix dependencies
+        run: dart pub get
 
       - name: Diagnose project
         run: |
           echo "🔍 Running FlutterFix diagnostics..."
-          flutterfix doctor || echo "Issues detected - FlutterFix can help!"
+          dart run bin/flutterfix.dart doctor || echo "Issues detected - FlutterFix can help!"
 
       - name: Comment on PR (if issues found)
         if: github.event_name == 'pull_request'
