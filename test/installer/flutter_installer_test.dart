@@ -31,9 +31,9 @@ void main() {
       final details = installer.getVersionDetails('3.24');
 
       expect(details, isNotNull);
-      expect(details!['gradle'], equals('8.3'));
-      expect(details['agp'], equals('8.1.0'));
-      expect(details['kotlin'], equals('1.9.0'));
+      expect(details!['gradle'], equals('8.7'));
+      expect(details['agp'], equals('8.5.0'));
+      expect(details['kotlin'], equals('2.0.0'));
       expect(details['java'], equals('17'));
     });
 
@@ -97,11 +97,11 @@ void main() {
       final details = installer.getVersionDetails('3.38');
 
       expect(details, isNotNull);
-      expect(details!['gradle'], equals('8.9'));
-      expect(details['agp'], equals('8.7.0'));
-      expect(details['kotlin'], equals('2.0.20'));
+      expect(details!['gradle'], equals('8.11'));
+      expect(details['agp'], equals('8.7.3'));
+      expect(details['kotlin'], equals('2.1.0'));
       expect(details['java'], equals('17'));
-      expect(details['min_sdk'], equals(21));
+      expect(details['min_sdk'], equals(24));
       expect(details['compile_sdk'], equals(35));
       expect(details['target_sdk'], equals(35));
     });
@@ -111,9 +111,9 @@ void main() {
       final details = installer.getVersionDetails('3.24');
 
       expect(details, isNotNull);
-      expect(details!['gradle'], equals('8.3'));
-      expect(details['agp'], equals('8.1.0'));
-      expect(details['kotlin'], equals('1.9.0'));
+      expect(details!['gradle'], equals('8.7'));
+      expect(details['agp'], equals('8.5.0'));
+      expect(details['kotlin'], equals('2.0.0'));
       expect(details['java'], equals('17'));
       expect(details['min_sdk'], equals(21));
       expect(details['compile_sdk'], equals(34));
@@ -125,10 +125,10 @@ void main() {
       final details = installer.getVersionDetails('3.16');
 
       expect(details, isNotNull);
-      expect(details!['gradle'], equals('7.5'));
-      expect(details['agp'], equals('7.3.0'));
-      expect(details['kotlin'], equals('1.7.10'));
-      expect(details['java'], equals('11'));
+      expect(details!['gradle'], equals('7.6'));
+      expect(details['agp'], equals('7.4.0'));
+      expect(details['kotlin'], equals('1.8.0'));
+      expect(details['java'], equals('17'));
     });
   });
 }

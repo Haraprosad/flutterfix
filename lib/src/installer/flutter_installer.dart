@@ -17,8 +17,28 @@ class FlutterInstaller {
 
   /// Load version compatibility map
   Future<void> loadVersionMap() async {
+    // Get the path to the flutterfix package's version_map.yaml
+    // Use Platform.script to get the location of the running script
+    final scriptUri = Platform.script;
+    final scriptPath = scriptUri.toFilePath();
+
+    // Navigate to the package root from the script location
+    // Typical structure: package_root/bin/flutterfix.dart or package_root/lib/...
+    String packageRoot;
+
+    if (scriptPath.contains('${p.separator}bin${p.separator}')) {
+      // Running from bin/flutterfix.dart
+      packageRoot = p.dirname(p.dirname(scriptPath));
+    } else if (scriptPath.contains('${p.separator}lib${p.separator}')) {
+      // Running from lib/ (during development)
+      packageRoot = p.dirname(p.dirname(scriptPath));
+    } else {
+      // Fallback: try to find the package root
+      packageRoot = Directory.current.path;
+    }
+
     final versionMapPath = p.join(
-      Directory.current.path,
+      packageRoot,
       'lib',
       'src',
       'config',
@@ -26,7 +46,30 @@ class FlutterInstaller {
     );
 
     if (!File(versionMapPath).existsSync()) {
-      throw Exception('Version map not found at $versionMapPath');
+      // Try alternative path for global installation
+      final homeDir =
+          Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+      final globalPath = p.join(
+        homeDir!,
+        '.pub-cache',
+        'global_packages',
+        'flutterfix',
+        'lib',
+        'src',
+        'config',
+        'version_map.yaml',
+      );
+
+      if (File(globalPath).existsSync()) {
+        final yamlString = await File(globalPath).readAsString();
+        final yamlDoc = loadYaml(yamlString);
+        versionMap =
+            Map<String, dynamic>.from(yamlDoc['flutter_compatibility']);
+        return;
+      }
+
+      throw Exception(
+          'Version map not found. Tried:\n  - $versionMapPath\n  - $globalPath');
     }
 
     final yamlString = await File(versionMapPath).readAsString();

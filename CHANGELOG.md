@@ -1,3 +1,9 @@
+## 1.1.1
+
+* Fixed critical bug: version_map.yaml now loads from FlutterFix package instead of user's project
+* Improved path resolution for global installations
+* Better error messages when version_map.yaml is not found
+
 ## 1.1.0
 
 * Updated version compatibility map with all stable Flutter versions from 2.0 to 3.38
