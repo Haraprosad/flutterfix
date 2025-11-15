@@ -28,8 +28,9 @@ void main() {
       final backup = BackupInfo(
         id: '123456',
         timestamp: DateTime(2024, 1, 1, 12, 0, 0),
-        originalPath: 'android/build.gradle',
-        backupPath: '.flutterfix/backups/build.gradle.backup.123456',
+        originalPath: p.join('android', 'build.gradle'),
+        backupPath:
+            p.join('.flutterfix', 'backups', 'build.gradle.backup.123456'),
         description: 'Test backup',
         projectPath: '/test/project',
       );
@@ -37,7 +38,7 @@ void main() {
       final json = backup.toJson();
 
       expect(json['id'], equals('123456'));
-      expect(json['originalPath'], equals('android/build.gradle'));
+      expect(json['originalPath'], equals(p.join('android', 'build.gradle')));
       expect(json['description'], equals('Test backup'));
     });
 
@@ -45,8 +46,9 @@ void main() {
       final json = {
         'id': '123456',
         'timestamp': '2024-01-01T12:00:00.000',
-        'originalPath': 'android/build.gradle',
-        'backupPath': '.flutterfix/backups/build.gradle.backup.123456',
+        'originalPath': p.join('android', 'build.gradle'),
+        'backupPath':
+            p.join('.flutterfix', 'backups', 'build.gradle.backup.123456'),
         'description': 'Test backup',
         'projectPath': '/test/project',
       };
@@ -54,7 +56,7 @@ void main() {
       final backup = BackupInfo.fromJson(json);
 
       expect(backup.id, equals('123456'));
-      expect(backup.originalPath, equals('android/build.gradle'));
+      expect(backup.originalPath, equals(p.join('android', 'build.gradle')));
       expect(backup.description, equals('Test backup'));
       expect(backup.timestamp.year, equals(2024));
     });
@@ -81,7 +83,7 @@ void main() {
       );
 
       expect(backup.id, isNotEmpty);
-      expect(backup.originalPath, equals('android/build.gradle'));
+      expect(backup.originalPath, equals(p.join('android', 'build.gradle')));
       expect(backup.description, equals('Test backup'));
       expect(File(backup.backupPath).existsSync(), isTrue);
     });
