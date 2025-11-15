@@ -1,7 +1,6 @@
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 import '../detect/flutter_detector.dart';
-import '../detect/gradle_detector.dart';
 import '../patcher/gradle_patcher.dart';
 import '../patcher/agp_patcher.dart';
 import '../patcher/kotlin_patcher.dart';

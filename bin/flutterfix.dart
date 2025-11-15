@@ -8,6 +8,30 @@ void main(List<String> arguments) async {
     ..addCommand('doctor')
     ..addCommand('sync')
     ..addCommand('upgrade')
+    ..addCommand(
+        'install',
+        ArgParser()
+          ..addOption(
+            'version',
+            help: 'Specific Flutter version to install (e.g., 3.24)',
+          )
+          ..addFlag(
+            'list',
+            abbr: 'l',
+            negatable: false,
+            help: 'List available Flutter versions',
+          )
+          ..addFlag(
+            'info',
+            abbr: 'i',
+            negatable: false,
+            help: 'Show version compatibility info',
+          )
+          ..addFlag(
+            'no-fvm',
+            negatable: false,
+            help: 'Install without using FVM (standalone)',
+          ))
     ..addFlag(
       'help',
       abbr: 'h',
@@ -85,6 +109,18 @@ Future<void> _executeCommand(
       await upgradeCmd.execute();
       break;
 
+    case 'install':
+      final installCmd = InstallCommand(
+        logger,
+        projectPath,
+        specificVersion: command['version'] as String?,
+        listVersions: command['list'] as bool,
+        showInfo: command['info'] as bool,
+        useFvm: !(command['no-fvm'] as bool),
+      );
+      await installCmd.execute();
+      break;
+
     default:
       print('Unknown command: ${command.name}');
       exit(1);
@@ -108,6 +144,7 @@ USAGE:
 COMMANDS:
   doctor      Diagnose project issues (non-destructive)
   sync        Fix all detected issues (default)
+  install     Install compatible Flutter version
   upgrade     Update FlutterFix to latest version
 
 OPTIONS:
@@ -122,6 +159,15 @@ EXAMPLES:
 
   # Diagnose without fixing
   flutterfix doctor
+
+  # Install compatible Flutter version automatically
+  flutterfix install
+
+  # List available Flutter versions
+  flutterfix install --list
+
+  # Install specific Flutter version
+  flutterfix install --version 3.24
 
   # Fix a specific project
   flutterfix --path /path/to/project

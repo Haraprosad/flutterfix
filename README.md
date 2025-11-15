@@ -68,11 +68,54 @@ That's it! The tool will:
 3. 🧹 Clean build caches
 4. ✅ Make your project ready to run
 
+### Install Compatible Flutter Version
+
+**Auto-install based on project requirements:**
+```bash
+flutterfix install
+```
+
+This will:
+1. 🔍 Detect your project's Flutter version requirement
+2. 📦 Install FVM (Flutter Version Management) if needed
+3. ⬇️ Download and install the compatible Flutter version
+4. 🔧 Configure your project to use the installed version
+
+**List all available Flutter versions:**
+```bash
+flutterfix install --list
+```
+
+**Install a specific Flutter version:**
+```bash
+flutterfix install --version 3.24
+```
+
+**Show version compatibility information:**
+```bash
+flutterfix install --version 3.24 --info
+```
+
 ### Common Use Cases
 
 **Fix a specific project:**
 ```bash
 flutterfix sync --path /path/to/flutter/project
+```
+
+**Install compatible Flutter version:**
+```bash
+flutterfix install
+```
+
+**List available Flutter versions:**
+```bash
+flutterfix install --list
+```
+
+**Install specific Flutter version:**
+```bash
+flutterfix install --version 3.24
 ```
 
 **Diagnose without fixing:**
@@ -97,7 +140,8 @@ flutterfix --help
 | Feature | Description |
 |---------|-------------|
 | 🎯 **Smart Version Detection** | Automatically detects Flutter, Gradle, Kotlin, and Java versions |
-| 🔄 **Compatibility Matrix** | Uses tested compatibility mappings for seamless fixes |
+| � **Flutter Auto-Install** | Installs compatible Flutter version using FVM or standalone |
+| �🔄 **Compatibility Matrix** | Uses tested compatibility mappings for seamless fixes |
 | 📝 **Auto-Configuration** | Updates `build.gradle`, `gradle-wrapper.properties`, and SDK settings |
 | 🧹 **Cache Cleaning** | Removes stale build artifacts that cause issues |
 | 📊 **Detailed Reports** | Shows what was fixed and what needs attention |
@@ -131,6 +175,12 @@ flutterfix --help
 - Cleans Flutter build directory
 - Removes Android build artifacts
 - Clears Gradle cache
+
+### 6. Flutter Version Management
+- Auto-installs compatible Flutter version
+- Uses FVM (Flutter Version Management) for easy switching
+- Supports standalone installations
+- Lists available Flutter versions
 
 ---
 
