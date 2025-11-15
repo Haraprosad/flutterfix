@@ -3,51 +3,60 @@
 
 flutter_compatibility:
   "3.38":
-    gradle: "8.9"
-    agp: "8.7.0"
-    kotlin: "2.0.20"
+    gradle: "8.11"
+    agp: "8.7.3"
+    kotlin: "2.1.0"
     java: "17"
-    min_sdk: 21
+    min_sdk: 24
     compile_sdk: 35
     target_sdk: 35
 
   "3.35":
-    gradle: "8.8"
-    agp: "8.6.0"
-    kotlin: "2.0.10"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
     java: "17"
-    min_sdk: 21
+    min_sdk: 24
     compile_sdk: 35
     target_sdk: 35
 
   "3.32":
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.29":
+    gradle: "8.9"
+    agp: "8.7.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.27":
+    gradle: "8.9"
+    agp: "8.6.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.24":
     gradle: "8.7"
     agp: "8.5.0"
     kotlin: "2.0.0"
     java: "17"
     min_sdk: 21
-    compile_sdk: 35
-    target_sdk: 35
-
-  "3.29":
-    gradle: "8.6"
-    agp: "8.4.0"
-    kotlin: "1.9.24"
-    java: "17"
-    min_sdk: 21
     compile_sdk: 34
     target_sdk: 34
 
-  "3.27":
-    gradle: "8.5"
-    agp: "8.3.0"
-    kotlin: "1.9.22"
-    java: "17"
-    min_sdk: 21
-    compile_sdk: 34
-    target_sdk: 34
-
-  "3.24":
+  "3.22":
     gradle: "8.3"
     agp: "8.1.0"
     kotlin: "1.9.0"
@@ -56,16 +65,16 @@ flutter_compatibility:
     compile_sdk: 34
     target_sdk: 34
 
-  "3.22":
+  "3.19":
     gradle: "8.0"
     agp: "8.0.0"
     kotlin: "1.8.22"
     java: "17"
     min_sdk: 21
-    compile_sdk: 34
-    target_sdk: 34
+    compile_sdk: 33
+    target_sdk: 33
 
-  "3.19":
+  "3.16":
     gradle: "7.6"
     agp: "7.4.0"
     kotlin: "1.8.0"
@@ -74,7 +83,7 @@ flutter_compatibility:
     compile_sdk: 33
     target_sdk: 33
 
-  "3.16":
+  "3.13":
     gradle: "7.5"
     agp: "7.3.0"
     kotlin: "1.7.10"
@@ -83,44 +92,91 @@ flutter_compatibility:
     compile_sdk: 33
     target_sdk: 33
 
-  "3.13":
+  "3.10":
     gradle: "7.4"
     agp: "7.2.0"
     kotlin: "1.7.0"
-    java: "11"
-    min_sdk: 21
-    compile_sdk: 33
-    target_sdk: 33
-
-  "3.10":
-    gradle: "7.3"
-    agp: "7.1.0"
-    kotlin: "1.6.10"
     java: "11"
     min_sdk: 21
     compile_sdk: 32
     target_sdk: 32
 
   "3.7":
-    gradle: "7.2"
-    agp: "7.0.0"
-    kotlin: "1.6.0"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
     java: "11"
     min_sdk: 21
     compile_sdk: 31
     target_sdk: 31
 
   "3.3":
-    gradle: "6.7"
-    agp: "4.1.0"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.0":
+    gradle: "7.0"
+    agp: "4.2.0"
     kotlin: "1.5.31"
     java: "11"
     min_sdk: 21
     compile_sdk: 30
     target_sdk: 30
 
+  "2.10":
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "2.8":
+    gradle: "6.7"
+    agp: "4.1.0"
+    kotlin: "1.5.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.5":
+    gradle: "6.5"
+    agp: "4.0.1"
+    kotlin: "1.4.32"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.2":
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0":
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
 # Gradle to Java compatibility
 gradle_java_compatibility:
+  "8.11": "17"
+  "8.10": "17"
   "8.9": "17"
   "8.8": "17"
   "8.7": "17"
@@ -136,13 +192,15 @@ gradle_java_compatibility:
   "7.0": "11"
   "6.9": "11"
   "6.7": "11"
+  "6.5": "11"
+  "6.3": "11"
 
 # Default versions (fallback)
 defaults:
-  gradle: "8.9"
-  agp: "8.7.0"
-  kotlin: "2.0.20"
+  gradle: "8.11"
+  agp: "8.7.3"
+  kotlin: "2.1.0"
   java: "17"
-  min_sdk: 21
+  min_sdk: 24
   compile_sdk: 35
   target_sdk: 35
