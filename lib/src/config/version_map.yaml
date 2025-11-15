@@ -1,0 +1,148 @@
+# Flutter Version Compatibility Matrix
+# Maps Flutter versions to compatible Gradle, AGP, Kotlin, and Java versions
+
+flutter_compatibility:
+  "3.38":
+    gradle: "8.9"
+    agp: "8.7.0"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35":
+    gradle: "8.8"
+    agp: "8.6.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32":
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.29":
+    gradle: "8.6"
+    agp: "8.4.0"
+    kotlin: "1.9.24"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.27":
+    gradle: "8.5"
+    agp: "8.3.0"
+    kotlin: "1.9.22"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24":
+    gradle: "8.3"
+    agp: "8.1.0"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.22":
+    gradle: "8.0"
+    agp: "8.0.0"
+    kotlin: "1.8.22"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19":
+    gradle: "7.6"
+    agp: "7.4.0"
+    kotlin: "1.8.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.16":
+    gradle: "7.5"
+    agp: "7.3.0"
+    kotlin: "1.7.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13":
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.10":
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.7":
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.3":
+    gradle: "6.7"
+    agp: "4.1.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+# Gradle to Java compatibility
+gradle_java_compatibility:
+  "8.9": "17"
+  "8.8": "17"
+  "8.7": "17"
+  "8.6": "17"
+  "8.5": "17"
+  "8.3": "17"
+  "8.0": "17"
+  "7.6": "17"
+  "7.5": "11"
+  "7.4": "11"
+  "7.3": "11"
+  "7.2": "11"
+  "7.0": "11"
+  "6.9": "11"
+  "6.7": "11"
+
+# Default versions (fallback)
+defaults:
+  gradle: "8.9"
+  agp: "8.7.0"
+  kotlin: "2.0.20"
+  java: "17"
+  min_sdk: 21
+  compile_sdk: 35
+  target_sdk: 35
