@@ -83,19 +83,22 @@ class PubspecPatcher {
           inDevDependencies = true;
           inDependencies = false;
           continue;
-        } else if (line.isNotEmpty && !line.startsWith(' ') && !line.startsWith('\t')) {
+        } else if (line.isNotEmpty &&
+            !line.startsWith(' ') &&
+            !line.startsWith('\t')) {
           // New top-level section
           inDependencies = false;
           inDevDependencies = false;
         }
 
         // Update package version if in dependencies sections
-        if ((inDependencies || inDevDependencies) && line.contains('$packageName:')) {
+        if ((inDependencies || inDevDependencies) &&
+            line.contains('$packageName:')) {
           // Pattern: "  package_name: ^1.2.3" or "  package_name: 1.2.3"
           final trimmed = line.trimLeft();
           if (trimmed.startsWith('$packageName:')) {
             final indent = line.substring(0, line.length - trimmed.length);
-            
+
             // Check if version is on the same line
             if (trimmed.contains(':') && trimmed.split(':').length == 2) {
               lines[i] = '$indent$packageName: ^$newVersion';
@@ -153,7 +156,8 @@ class PubspecPatcher {
       }
 
       // Get dev dependencies
-      final devDependencies = yaml['dev_dependencies'] as Map<dynamic, dynamic>?;
+      final devDependencies =
+          yaml['dev_dependencies'] as Map<dynamic, dynamic>?;
       if (devDependencies != null) {
         for (final entry in devDependencies.entries) {
           final name = entry.key.toString();

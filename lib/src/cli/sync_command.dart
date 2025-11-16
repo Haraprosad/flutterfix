@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:mason_logger/mason_logger.dart';
 import '../detect/flutter_detector.dart';
@@ -363,7 +364,14 @@ class SyncCommand {
 
     if (errors.isEmpty) {
       logger.success('\n✅ Project fixed successfully!');
-      logger.info('You can now run: flutter run');
+      
+      // Check if using FVM
+      final fvmDir = Directory(p.join(projectPath, '.fvm'));
+      if (fvmDir.existsSync()) {
+        logger.info('You can now run: fvm flutter run');
+      } else {
+        logger.info('You can now run: flutter run');
+      }
     }
 
     print('═══════════════════════════════════════════');
@@ -413,13 +421,15 @@ class SyncCommand {
       }
 
       // Fix each conflict
-      logger.info('⚠️  Found ${result.conflicts.length} dependency conflict(s)\n');
+      logger.info(
+          '⚠️  Found ${result.conflicts.length} dependency conflict(s)\n');
       bool anyFixed = false;
 
       for (final conflict in result.conflicts) {
         logger.info('🔍 Resolving: ${conflict.package}');
         logger.detail('   Current: ${conflict.currentVersion}');
-        logger.detail('   Conflict: ${conflict.conflictingDependency} requires ${conflict.requiredVersion}');
+        logger.detail(
+            '   Conflict: ${conflict.conflictingDependency} requires ${conflict.requiredVersion}');
 
         // Find compatible version
         final compatibleVersion = await resolver.findCompatibleVersion(
@@ -428,7 +438,8 @@ class SyncCommand {
         );
 
         if (compatibleVersion == null) {
-          logger.warn('   ⚠️  No compatible version found for ${conflict.package}');
+          logger.warn(
+              '   ⚠️  No compatible version found for ${conflict.package}');
           continue;
         }
 
@@ -444,13 +455,32 @@ class SyncCommand {
         );
 
         if (updated) {
-          logger.success('   ✓ Downgraded ${conflict.package}: ${conflict.currentVersion} → $compatibleVersion');
+          logger.success(
+              '   ✓ Downgraded ${conflict.package}: ${conflict.currentVersion} → $compatibleVersion');
           anyFixed = true;
         }
       }
 
       if (!anyFixed) {
-        logger.warn('⚠️  Could not fix any dependency conflicts');
+        logger.warn('⚠️  Could not fix any dependency conflicts automatically');
+        logger.info('');
+        logger.info('💡 Manual action required:');
+        logger.info('');
+
+        for (final conflict in result.conflicts) {
+          logger.info(
+              '   Package: ${conflict.package} ${conflict.currentVersion}');
+          logger.info(
+              '   Issue: Incompatible with Flutter SDK ${flutterVersion}');
+          logger.info('');
+        }
+
+        logger.info('   Suggested solutions:');
+        logger.info('   1. Upgrade to a newer Flutter version (e.g., 3.27+)');
+        logger.info('   2. Remove or replace the incompatible package');
+        logger.info('   3. Check if the package is actually needed');
+        logger.info('');
+
         await patcher.restoreFromBackup();
         return;
       }

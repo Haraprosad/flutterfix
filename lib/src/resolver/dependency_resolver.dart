@@ -172,6 +172,7 @@ class DependencyResolver {
       });
 
       // Find the highest version that is compatible with current Dart SDK
+      // and doesn't have conflicting dependencies
       for (final versionData in versions) {
         final version = versionData['version'] as String;
         final pubspec = versionData['pubspec'] as Map<String, dynamic>;
@@ -183,12 +184,37 @@ class DependencyResolver {
         if (sdkConstraint == null) continue;
 
         // Check if current Dart SDK satisfies this version's constraint
-        if (_sdkSatisfiesConstraint(dartSdkVersion, sdkConstraint)) {
-          logger.detail(
-            'Found compatible version: $packageName $version (SDK: $sdkConstraint)',
-          );
-          return version;
+        if (!_sdkSatisfiesConstraint(dartSdkVersion, sdkConstraint)) {
+          continue;
         }
+
+        // Check if this version's dependencies conflict with Flutter SDK pinned packages
+        final dependencies = pubspec['dependencies'] as Map<String, dynamic>?;
+        if (dependencies != null) {
+          // Check for collection dependency (commonly pinned by flutter_test)
+          final collectionDep = dependencies['collection'];
+          if (collectionDep is String) {
+            // Parse the collection constraint
+            // Flutter 3.24.5 has collection 1.18.0
+            // If package requires ^1.19.0, it's incompatible
+            if (collectionDep.startsWith('^1.19') ||
+                collectionDep.startsWith('>=1.19') ||
+                collectionDep.contains('^1.19.') ||
+                collectionDep.contains('>=1.19.')) {
+              logger.detail(
+                'Skipping $packageName $version: requires collection $collectionDep (incompatible with Flutter SDK collection 1.18.0)',
+              );
+              continue;
+            }
+            // ^1.15.0, ^1.16.0, ^1.17.0, ^1.18.0 are all compatible with 1.18.0
+            // So we only skip versions requiring 1.19+
+          }
+        }
+
+        logger.detail(
+          'Found compatible version: $packageName $version (SDK: $sdkConstraint)',
+        );
+        return version;
       }
 
       logger.warn('No compatible version found for $packageName');
