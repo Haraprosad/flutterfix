@@ -1,3 +1,37 @@
+## 1.3.0
+
+### 🚀 New Feature: Automatic Dependency Resolution
+
+* **Added `--fix-dependencies` flag** - Automatically resolves Dart package dependency conflicts
+  - Detects incompatible packages from `flutter pub get` or `fvm flutter pub get` errors
+  - Queries pub.dev API to find compatible package versions for current Dart SDK
+  - Automatically downgrades problematic packages to working versions
+  - Preserves pubspec.yaml formatting, comments, and structure
+  - Includes backup/restore mechanism for safety
+  - Works with both standard Flutter and FVM installations
+
+### 📦 New Modules
+
+* `lib/src/resolver/dependency_resolver.dart` - Dependency conflict detection and resolution
+* `lib/src/patcher/pubspec_patcher.dart` - Safe pubspec.yaml modification with backups
+* `test/resolver/dependency_resolver_test.dart` - Test coverage for dependency resolution
+
+### 🔧 Usage
+
+```bash
+# Fix Android configs AND dependency conflicts
+flutterfix sync --original --install-flutter --fix-dependencies
+
+# Example: Automatically fixes http_parser 4.1.2 → 4.0.2 for Flutter 3.24.5
+```
+
+### ⚠️ Safety Features
+
+* Creates `pubspec.yaml.backup` before making changes
+* Automatically restores backup if dependency resolution fails
+* Verifies fixes by re-running pub get
+* Never breaks your app - rolls back on any errors
+
 ## 1.2.3
 
 ### 🐛 Critical Bug Fix

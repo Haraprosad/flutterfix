@@ -5,15 +5,18 @@ import '../detect/flutter_detector.dart';
 import '../patcher/gradle_patcher.dart';
 import '../patcher/agp_patcher.dart';
 import '../patcher/kotlin_patcher.dart';
+import '../patcher/pubspec_patcher.dart';
 import '../utils/file_utils.dart';
 import '../runner/process_runner.dart';
 import '../installer/flutter_installer.dart';
+import '../resolver/dependency_resolver.dart';
 
 class SyncCommand {
   final Logger logger;
   final String projectPath;
   final bool useOriginal;
   final bool autoInstallFlutter;
+  final bool fixDependencies;
   late Map<String, dynamic> versionMap;
 
   SyncCommand(
@@ -21,6 +24,7 @@ class SyncCommand {
     this.projectPath, {
     this.useOriginal = false,
     this.autoInstallFlutter = false,
+    this.fixDependencies = false,
   });
 
   Future<void> execute() async {
@@ -51,6 +55,11 @@ class SyncCommand {
     // Fix Android
     if (FileUtils.hasAndroidFolder(projectPath)) {
       await _fixAndroid(flutterInfo.version!, fixed, warnings, errors);
+    }
+
+    // Fix Dart dependencies if requested
+    if (fixDependencies) {
+      await _fixDartDependencies(flutterInfo.version!);
     }
 
     // Clean and refresh
@@ -116,6 +125,11 @@ class SyncCommand {
     // Fix Android with version-specific configs
     if (FileUtils.hasAndroidFolder(projectPath)) {
       await _fixAndroid(flutterVersion, fixed, warnings, errors);
+    }
+
+    // Fix Dart dependencies if requested
+    if (fixDependencies) {
+      await _fixDartDependencies(flutterVersion);
     }
 
     // Clean and refresh
@@ -354,5 +368,114 @@ class SyncCommand {
 
     print('═══════════════════════════════════════════');
     print('');
+  }
+
+  /// Fixes Dart package dependency conflicts
+  Future<void> _fixDartDependencies(String flutterVersion) async {
+    logger.info('\n🔧 Checking Dart package dependencies...\n');
+
+    final resolver = DependencyResolver(logger, projectPath);
+    final patcher = PubspecPatcher(logger, projectPath);
+
+    // Create backup
+    try {
+      await patcher.createBackup();
+    } catch (e) {
+      logger.err('Failed to create backup: $e');
+      return;
+    }
+
+    try {
+      // Get Dart SDK version
+      final dartSdkVersion = await resolver.getDartSdkVersion();
+      if (dartSdkVersion == null) {
+        logger.warn('Could not determine Dart SDK version');
+        await patcher.deleteBackup();
+        return;
+      }
+
+      logger.detail('Dart SDK: $dartSdkVersion');
+
+      // Run pub get to detect conflicts
+      final result = await resolver.runPubGet();
+
+      if (result.success) {
+        logger.success('✅ No dependency conflicts found!');
+        await patcher.deleteBackup();
+        return;
+      }
+
+      if (!result.hasConflicts) {
+        logger.warn('⚠️  pub get failed but no conflicts detected');
+        logger.detail(result.output);
+        await patcher.deleteBackup();
+        return;
+      }
+
+      // Fix each conflict
+      logger.info('⚠️  Found ${result.conflicts.length} dependency conflict(s)\n');
+      bool anyFixed = false;
+
+      for (final conflict in result.conflicts) {
+        logger.info('🔍 Resolving: ${conflict.package}');
+        logger.detail('   Current: ${conflict.currentVersion}');
+        logger.detail('   Conflict: ${conflict.conflictingDependency} requires ${conflict.requiredVersion}');
+
+        // Find compatible version
+        final compatibleVersion = await resolver.findCompatibleVersion(
+          conflict.package,
+          dartSdkVersion,
+        );
+
+        if (compatibleVersion == null) {
+          logger.warn('   ⚠️  No compatible version found for ${conflict.package}');
+          continue;
+        }
+
+        if (compatibleVersion == conflict.currentVersion) {
+          logger.info('   ✓ Already using compatible version');
+          continue;
+        }
+
+        // Update pubspec.yaml
+        final updated = await patcher.updatePackageVersion(
+          conflict.package,
+          compatibleVersion,
+        );
+
+        if (updated) {
+          logger.success('   ✓ Downgraded ${conflict.package}: ${conflict.currentVersion} → $compatibleVersion');
+          anyFixed = true;
+        }
+      }
+
+      if (!anyFixed) {
+        logger.warn('⚠️  Could not fix any dependency conflicts');
+        await patcher.restoreFromBackup();
+        return;
+      }
+
+      // Re-run pub get to verify
+      logger.info('\n📦 Verifying dependency resolution...');
+      final verifyResult = await resolver.runPubGet();
+
+      if (verifyResult.success) {
+        logger.success('✅ All dependency conflicts resolved!');
+        await patcher.deleteBackup();
+      } else {
+        logger.err('❌ Dependency resolution still failing');
+        logger.info('Rolling back changes...');
+        await patcher.restoreFromBackup();
+      }
+    } catch (e, stackTrace) {
+      logger.err('Error fixing dependencies: $e');
+      logger.detail('$stackTrace');
+      logger.info('Rolling back changes...');
+      try {
+        await patcher.restoreFromBackup();
+      } catch (restoreError) {
+        logger.err('Failed to restore backup: $restoreError');
+      }
+    }
   }
 }

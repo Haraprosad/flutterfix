@@ -19,6 +19,11 @@ void main(List<String> arguments) async {
             'install-flutter',
             negatable: false,
             help: 'Auto-install detected Flutter version if not present',
+          )
+          ..addFlag(
+            'fix-dependencies',
+            negatable: false,
+            help: 'Automatically fix Dart package dependency conflicts',
           ))
     ..addCommand('upgrade')
     ..addCommand(
@@ -141,6 +146,7 @@ Future<void> _executeCommand(
         projectPath,
         useOriginal: command['original'] as bool,
         autoInstallFlutter: command['install-flutter'] as bool,
+        fixDependencies: command['fix-dependencies'] as bool,
       );
       await syncCmd.execute();
       break;

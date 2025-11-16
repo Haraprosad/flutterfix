@@ -134,8 +134,38 @@ flutterfix sync --original
 # Use original version + auto-install if not present
 flutterfix sync --original --install-flutter
 
+# 🆕 Auto-fix Dart dependency conflicts (v1.3.0+)
+flutterfix sync --original --install-flutter --fix-dependencies
+
 # Sync specific project path
 flutterfix sync --path /path/to/project
+```
+
+**🆕 New in v1.3.0: `--fix-dependencies` flag**
+
+Automatically resolves Dart package dependency conflicts:
+
+```bash
+# Example: Fix http_parser incompatibility with Flutter 3.24.5
+flutterfix sync --original --install-flutter --fix-dependencies
+```
+
+**What it does:**
+- 🔍 Detects dependency conflicts from `pub get` errors
+- 🌐 Queries pub.dev for compatible package versions
+- ⬇️ Auto-downgrades incompatible packages (e.g., `http_parser 4.1.2 → 4.0.2`)
+- 💾 Creates backup before changes (`pubspec.yaml.backup`)
+- ✅ Verifies fixes by re-running pub get
+- 🔄 Rolls back on failure - never breaks your app
+
+**Example conflict it solves:**
+```
+❌ flutter_test from sdk is incompatible with http_parser ^4.1.2
+   (requires collection ^1.19.0, but Flutter 3.24.5 has collection 1.18.0)
+
+✅ After --fix-dependencies:
+   Updated http_parser: 4.1.2 → 4.0.2
+   All dependency conflicts resolved!
 ```
 
 #### **Install Command**
