@@ -1,3 +1,13 @@
+## 1.2.1
+
+### 🐛 Bug Fixes
+
+* **Fixed version_map.yaml loading** - Improved path resolution for globally installed package
+  - Now correctly finds version_map.yaml when installed via `dart pub global activate flutterfix`
+  - Prioritizes local development version over published versions
+  - Sorts published versions to use the latest available
+  - Fixes "FileSystemException: File not found" error when running globally installed FlutterFix
+
 ## 1.2.0
 
 ### 🎯 Major Features

@@ -1,6 +1,6 @@
 name: flutterfix
 description: A zero-config CLI tool that automatically fixes Flutter & Android build errors — resolving Gradle, Kotlin, Java, and Flutter version mismatches with one command.
-version: 1.2.0
+version: 1.2.1
 homepage: https://github.com/haraprosad/flutterfix
 repository: https://github.com/haraprosad/flutterfix
 issue_tracker: https://github.com/haraprosad/flutterfix/issues

@@ -17,40 +17,99 @@ class FlutterInstaller {
 
   /// Load version compatibility map
   Future<void> loadVersionMap() async {
-    // Get the path to the flutterfix package's version_map.yaml
-    // Use Platform.script to get the location of the running script
-    final scriptUri = Platform.script;
-    final scriptPath = scriptUri.toFilePath();
+    // Try multiple paths to find version_map.yaml
+    final pathsToTry = <String>[];
 
-    // Navigate to the package root from the script location
-    // Typical structure: package_root/bin/flutterfix.dart or package_root/lib/...
-    String packageRoot;
-
-    if (scriptPath.contains('${p.separator}bin${p.separator}')) {
-      // Running from bin/flutterfix.dart
-      packageRoot = p.dirname(p.dirname(scriptPath));
-    } else if (scriptPath.contains('${p.separator}lib${p.separator}')) {
-      // Running from lib/ (during development)
-      packageRoot = p.dirname(p.dirname(scriptPath));
-    } else {
-      // Fallback: try to find the package root
-      packageRoot = Directory.current.path;
-    }
-
-    final versionMapPath = p.join(
-      packageRoot,
+    // 1. Check if we're in the package directory (for local development/testing)
+    final currentDir = Directory.current;
+    final localPath = p.join(
+      currentDir.path,
       'lib',
       'src',
       'config',
       'version_map.yaml',
     );
+    if (File(localPath).existsSync()) {
+      pathsToTry.add(localPath);
+    }
 
-    if (!File(versionMapPath).existsSync()) {
-      // Try alternative path for global installation
-      final homeDir =
-          Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    // 2. Try path relative to Platform.script (for installed package)
+    final scriptUri = Platform.script;
+    if (scriptUri.scheme == 'file') {
+      final scriptPath = scriptUri.toFilePath();
+      String packageRoot;
+
+      if (scriptPath.contains('${p.separator}bin${p.separator}')) {
+        // Running from bin/flutterfix.dart
+        packageRoot = p.dirname(p.dirname(scriptPath));
+      } else if (scriptPath.contains('${p.separator}lib${p.separator}')) {
+        // Running from lib/
+        packageRoot = p.dirname(p.dirname(scriptPath));
+      } else {
+        packageRoot = p.dirname(scriptPath);
+      }
+
+      final scriptBasedPath = p.join(
+        packageRoot,
+        'lib',
+        'src',
+        'config',
+        'version_map.yaml',
+      );
+      if (File(scriptBasedPath).existsSync() && scriptBasedPath != localPath) {
+        pathsToTry.add(scriptBasedPath);
+      }
+    }
+
+    // 3. Try pub cache hosted package path (for published package)
+    final homeDir =
+        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    if (homeDir != null) {
+      final pubCacheHosted = p.join(homeDir, '.pub-cache', 'hosted');
+
+      // Find flutterfix package directories and sort by version (latest first)
+      final pubCacheDir = Directory(pubCacheHosted);
+      if (pubCacheDir.existsSync()) {
+        final flutterfixPaths = <String>[];
+        final subdirs = pubCacheDir.listSync();
+        for (final subdir in subdirs) {
+          if (subdir is Directory) {
+            final flutterfixDirs = subdir
+                .listSync()
+                .where((e) =>
+                    e is Directory &&
+                    p.basename(e.path).startsWith('flutterfix-'))
+                .toList();
+
+            for (final dir in flutterfixDirs) {
+              final versionMapPath = p.join(
+                dir.path,
+                'lib',
+                'src',
+                'config',
+                'version_map.yaml',
+              );
+              if (File(versionMapPath).existsSync()) {
+                flutterfixPaths.add(versionMapPath);
+              }
+            }
+          }
+        }
+
+        // Sort by version number (latest first) by extracting version from path
+        flutterfixPaths.sort((a, b) {
+          final versionA = _extractVersionFromPath(a);
+          final versionB = _extractVersionFromPath(b);
+          return _compareVersions(
+              versionB, versionA); // Reverse for descending order
+        });
+
+        pathsToTry.addAll(flutterfixPaths);
+      }
+
+      // 4. Try global packages path (alternative location)
       final globalPath = p.join(
-        homeDir!,
+        homeDir,
         '.pub-cache',
         'global_packages',
         'flutterfix',
@@ -59,22 +118,43 @@ class FlutterInstaller {
         'config',
         'version_map.yaml',
       );
-
       if (File(globalPath).existsSync()) {
-        final yamlString = await File(globalPath).readAsString();
+        pathsToTry.add(globalPath);
+      }
+    }
+
+    // Try each path until we find one that exists
+    for (final versionMapPath in pathsToTry) {
+      if (File(versionMapPath).existsSync()) {
+        final yamlString = await File(versionMapPath).readAsString();
         final yamlDoc = loadYaml(yamlString);
         versionMap =
             Map<String, dynamic>.from(yamlDoc['flutter_compatibility']);
         return;
       }
-
-      throw Exception(
-          'Version map not found. Tried:\n  - $versionMapPath\n  - $globalPath');
     }
 
-    final yamlString = await File(versionMapPath).readAsString();
-    final yamlDoc = loadYaml(yamlString);
-    versionMap = Map<String, dynamic>.from(yamlDoc['flutter_compatibility']);
+    throw Exception(
+        'Version map not found. Tried:\n${pathsToTry.map((p) => '  - $p').join('\n')}');
+  }
+
+  /// Extract version number from file path
+  String _extractVersionFromPath(String path) {
+    final match = RegExp(r'flutterfix-(\d+\.\d+\.\d+)').firstMatch(path);
+    return match?.group(1) ?? '0.0.0';
+  }
+
+  /// Compare two semantic versions
+  int _compareVersions(String a, String b) {
+    final aParts = a.split('.').map(int.parse).toList();
+    final bParts = b.split('.').map(int.parse).toList();
+
+    for (var i = 0; i < 3; i++) {
+      if (aParts[i] != bParts[i]) {
+        return aParts[i].compareTo(bParts[i]);
+      }
+    }
+    return 0;
   }
 
   /// Check if FVM is installed
