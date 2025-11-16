@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 import '../runner/process_runner.dart';
@@ -17,125 +18,171 @@ class FlutterInstaller {
 
   /// Load version compatibility map
   Future<void> loadVersionMap() async {
-    // Try multiple paths to find version_map.yaml
-    final pathsToTry = <String>[];
+    String? yamlContent;
 
-    // 1. Check if we're in the package directory (for local development/testing)
-    final currentDir = Directory.current;
-    final localPath = p.join(
-      currentDir.path,
-      'lib',
-      'src',
-      'config',
-      'version_map.yaml',
-    );
-    if (File(localPath).existsSync()) {
-      pathsToTry.add(localPath);
+    // Strategy 1: Try to load as package resource URI (works for published packages)
+    try {
+      final resourceUri =
+          Uri.parse('package:flutterfix/src/config/version_map.yaml');
+      // ignore: deprecated_member_use
+      final resolvedUri = await Isolate.resolvePackageUri(resourceUri);
+      if (resolvedUri != null && resolvedUri.scheme == 'file') {
+        final file = File(resolvedUri.toFilePath());
+        if (file.existsSync()) {
+          yamlContent = await file.readAsString();
+          logger.detail('Loaded version_map.yaml from package URI');
+        }
+      }
+    } catch (e) {
+      logger.detail('Package URI resolution failed: $e');
+      // Ignore and try other methods
     }
 
-    // 2. Try path relative to Platform.script (for installed package)
-    final scriptUri = Platform.script;
-    if (scriptUri.scheme == 'file') {
-      final scriptPath = scriptUri.toFilePath();
-      String packageRoot;
+    // Strategy 2: Try multiple file system paths
+    if (yamlContent == null) {
+      final pathsToTry = <String>[];
 
-      if (scriptPath.contains('${p.separator}bin${p.separator}')) {
-        // Running from bin/flutterfix.dart
-        packageRoot = p.dirname(p.dirname(scriptPath));
-      } else if (scriptPath.contains('${p.separator}lib${p.separator}')) {
-        // Running from lib/
-        packageRoot = p.dirname(p.dirname(scriptPath));
-      } else {
-        packageRoot = p.dirname(scriptPath);
-      }
-
-      final scriptBasedPath = p.join(
-        packageRoot,
+      // 2a. Check current directory (for local development/testing)
+      final currentDir = Directory.current;
+      final localPath = p.join(
+        currentDir.path,
         'lib',
         'src',
         'config',
         'version_map.yaml',
       );
-      if (File(scriptBasedPath).existsSync() && scriptBasedPath != localPath) {
-        pathsToTry.add(scriptBasedPath);
+      if (File(localPath).existsSync()) {
+        pathsToTry.add(localPath);
       }
-    }
 
-    // 3. Try pub cache hosted package path (for published package)
-    final homeDir =
-        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
-    if (homeDir != null) {
-      final pubCacheHosted = p.join(homeDir, '.pub-cache', 'hosted');
+      // 2b. For path-activated packages, resolve from snapshot location
+      final scriptUri = Platform.script;
+      if (scriptUri.scheme == 'file') {
+        final scriptPath = scriptUri.toFilePath();
 
-      // Find flutterfix package directories and sort by version (latest first)
-      final pubCacheDir = Directory(pubCacheHosted);
-      if (pubCacheDir.existsSync()) {
-        final flutterfixPaths = <String>[];
-        final subdirs = pubCacheDir.listSync();
-        for (final subdir in subdirs) {
-          if (subdir is Directory) {
-            final flutterfixDirs = subdir
-                .listSync()
-                .where((e) =>
-                    e is Directory &&
-                    p.basename(e.path).startsWith('flutterfix-'))
-                .toList();
-
-            for (final dir in flutterfixDirs) {
-              final versionMapPath = p.join(
-                dir.path,
-                'lib',
-                'src',
-                'config',
-                'version_map.yaml',
-              );
-              if (File(versionMapPath).existsSync()) {
-                flutterfixPaths.add(versionMapPath);
-              }
+        // Check if snapshot is in .dart_tool/pub/bin/ (path-activated package)
+        if (scriptPath.contains(
+            '.dart_tool${p.separator}pub${p.separator}bin${p.separator}')) {
+          final dartToolIndex = scriptPath.indexOf('.dart_tool');
+          if (dartToolIndex != -1) {
+            final packageRoot = scriptPath.substring(0, dartToolIndex);
+            final pathActivatedVersionMap = p.join(
+              packageRoot,
+              'lib',
+              'src',
+              'config',
+              'version_map.yaml',
+            );
+            if (File(pathActivatedVersionMap).existsSync()) {
+              pathsToTry.add(pathActivatedVersionMap);
             }
           }
         }
-
-        // Sort by version number (latest first) by extracting version from path
-        flutterfixPaths.sort((a, b) {
-          final versionA = _extractVersionFromPath(a);
-          final versionB = _extractVersionFromPath(b);
-          return _compareVersions(
-              versionB, versionA); // Reverse for descending order
-        });
-
-        pathsToTry.addAll(flutterfixPaths);
       }
 
-      // 4. Try global packages path (alternative location)
-      final globalPath = p.join(
-        homeDir,
-        '.pub-cache',
-        'global_packages',
-        'flutterfix',
-        'lib',
-        'src',
-        'config',
-        'version_map.yaml',
-      );
-      if (File(globalPath).existsSync()) {
-        pathsToTry.add(globalPath);
+      // 2c. Try path relative to Platform.script
+      if (scriptUri.scheme == 'file') {
+        final scriptPath = scriptUri.toFilePath();
+        String packageRoot;
+
+        if (scriptPath.contains('${p.separator}bin${p.separator}')) {
+          packageRoot = p.dirname(p.dirname(scriptPath));
+        } else if (scriptPath.contains('${p.separator}lib${p.separator}')) {
+          packageRoot = p.dirname(p.dirname(scriptPath));
+        } else {
+          packageRoot = p.dirname(scriptPath);
+        }
+
+        final scriptBasedPath = p.join(
+          packageRoot,
+          'lib',
+          'src',
+          'config',
+          'version_map.yaml',
+        );
+        if (File(scriptBasedPath).existsSync() &&
+            scriptBasedPath != localPath) {
+          pathsToTry.add(scriptBasedPath);
+        }
+      }
+
+      // 2d. Try pub cache hosted package path (for published packages)
+      final homeDir =
+          Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+      if (homeDir != null) {
+        final pubCacheHosted = p.join(homeDir, '.pub-cache', 'hosted');
+
+        final pubCacheDir = Directory(pubCacheHosted);
+        if (pubCacheDir.existsSync()) {
+          final flutterfixPaths = <String>[];
+          final subdirs = pubCacheDir.listSync();
+          for (final subdir in subdirs) {
+            if (subdir is Directory) {
+              final flutterfixDirs = subdir
+                  .listSync()
+                  .where((e) =>
+                      e is Directory &&
+                      p.basename(e.path).startsWith('flutterfix-'))
+                  .toList();
+
+              for (final dir in flutterfixDirs) {
+                final versionMapPath = p.join(
+                  dir.path,
+                  'lib',
+                  'src',
+                  'config',
+                  'version_map.yaml',
+                );
+                if (File(versionMapPath).existsSync()) {
+                  flutterfixPaths.add(versionMapPath);
+                }
+              }
+            }
+          }
+
+          // Sort by version number (latest first)
+          flutterfixPaths.sort((a, b) {
+            final versionA = _extractVersionFromPath(a);
+            final versionB = _extractVersionFromPath(b);
+            return _compareVersions(versionB, versionA);
+          });
+
+          pathsToTry.addAll(flutterfixPaths);
+        }
+
+        // 2e. Try global packages path
+        final globalPath = p.join(
+          homeDir,
+          '.pub-cache',
+          'global_packages',
+          'flutterfix',
+          'lib',
+          'src',
+          'config',
+          'version_map.yaml',
+        );
+        if (File(globalPath).existsSync()) {
+          pathsToTry.add(globalPath);
+        }
+      }
+
+      // Try each path until we find one that exists
+      for (final versionMapPath in pathsToTry) {
+        if (File(versionMapPath).existsSync()) {
+          yamlContent = await File(versionMapPath).readAsString();
+          break;
+        }
+      }
+
+      if (yamlContent == null) {
+        throw Exception(
+            'Version map not found. Tried:\n${pathsToTry.map((p) => '  - $p').join('\n')}');
       }
     }
 
-    // Try each path until we find one that exists
-    for (final versionMapPath in pathsToTry) {
-      if (File(versionMapPath).existsSync()) {
-        final yamlString = await File(versionMapPath).readAsString();
-        final yamlDoc = loadYaml(yamlString);
-        versionMap =
-            Map<String, dynamic>.from(yamlDoc['flutter_compatibility']);
-        return;
-      }
-    }
-
-    throw Exception(
-        'Version map not found. Tried:\n${pathsToTry.map((p) => '  - $p').join('\n')}');
+    // Parse YAML content
+    final yamlDoc = loadYaml(yamlContent);
+    versionMap = Map<String, dynamic>.from(yamlDoc['flutter_compatibility']);
   }
 
   /// Extract version number from file path

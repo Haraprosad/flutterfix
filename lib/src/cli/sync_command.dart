@@ -1,5 +1,6 @@
+import 'dart:convert';
+import 'package:path/path.dart' as p;
 import 'package:mason_logger/mason_logger.dart';
-import 'package:yaml/yaml.dart';
 import '../detect/flutter_detector.dart';
 import '../patcher/gradle_patcher.dart';
 import '../patcher/agp_patcher.dart';
@@ -49,7 +50,7 @@ class SyncCommand {
 
     // Fix Android
     if (FileUtils.hasAndroidFolder(projectPath)) {
-      await _fixAndroid(flutterInfo, fixed, warnings, errors);
+      await _fixAndroid(flutterInfo.version!, fixed, warnings, errors);
     }
 
     // Clean and refresh
@@ -89,12 +90,24 @@ class SyncCommand {
 
     // Now sync with the detected/installed version
     final flutterInfo = await FlutterDetector.detectInstalled();
-    if (!flutterInfo.isInstalled) {
-      logger.err('❌ Flutter not installed');
+    String? flutterVersion = flutterInfo.version;
+
+    // If global Flutter not found, check FVM config
+    if (flutterVersion == null || !flutterInfo.isInstalled) {
+      final fvmConfigPath = p.join(projectPath, '.fvm', 'fvm_config.json');
+      if (FileUtils.fileExists(fvmConfigPath)) {
+        final fvmConfig = await FileUtils.readFile(fvmConfigPath);
+        final config = jsonDecode(fvmConfig) as Map<String, dynamic>;
+        flutterVersion = config['flutterSdkVersion'] as String?;
+      }
+    }
+
+    if (flutterVersion == null) {
+      logger.err('❌ Could not determine Flutter version');
       return;
     }
 
-    logger.info('📦 Using Flutter ${flutterInfo.version}\n');
+    logger.info('📦 Using Flutter $flutterVersion\n');
 
     final fixed = <String>[];
     final warnings = <String>[];
@@ -102,7 +115,7 @@ class SyncCommand {
 
     // Fix Android with version-specific configs
     if (FileUtils.hasAndroidFolder(projectPath)) {
-      await _fixAndroid(flutterInfo, fixed, warnings, errors);
+      await _fixAndroid(flutterVersion, fixed, warnings, errors);
     }
 
     // Clean and refresh
@@ -164,14 +177,14 @@ class SyncCommand {
   }
 
   Future<void> _fixAndroid(
-    FlutterInfo flutterInfo,
+    String flutterVersion,
     List<String> fixed,
     List<String> warnings,
     List<String> errors,
   ) async {
     logger.info('🔧 Fixing Android configuration...\n');
 
-    final versions = _getCompatibleVersions(flutterInfo.majorMinorVersion);
+    final versions = _getCompatibleVersions(flutterVersion);
 
     // Fix Gradle
     final gradlePatcher = GradlePatcher(projectPath);
@@ -244,11 +257,20 @@ class SyncCommand {
   }
 
   Future<void> _loadVersionMap() async {
-    // Load from embedded config
-    final configPath = 'lib/src/config/version_map.yaml';
-    final content = await FileUtils.readFile(configPath);
-    final yaml = loadYaml(content);
-    versionMap = Map<String, dynamic>.from(yaml as Map);
+    // Use FlutterInstaller to load version map with proper path resolution
+    final installer = FlutterInstaller(logger);
+    await installer.loadVersionMap();
+    versionMap = {'flutter_compatibility': installer.versionMap};
+
+    // Add defaults if not present
+    if (!versionMap.containsKey('defaults')) {
+      versionMap['defaults'] = {
+        'gradle': '8.0',
+        'agp': '8.0.0',
+        'kotlin': '1.8.0',
+        'java': '17',
+      };
+    }
   }
 
   Map<String, dynamic> _getCompatibleVersions(String flutterVersion) {

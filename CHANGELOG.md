@@ -1,3 +1,24 @@
+## 1.2.3
+
+### 🐛 Critical Bug Fix
+
+* **Fixed version_map.yaml loading for globally installed package**
+  - Added `Isolate.resolvePackageUri()` for proper package resource resolution
+  - Works correctly when installed via `dart pub global activate flutterfix`
+  - Supports multiple installation scenarios:
+    - Published packages from pub.dev
+    - Path-activated local packages
+    - Development mode
+  - Fixed FVM Flutter version detection from `.fvm/fvm_config.json`
+  - Updated `sync_command.dart` to use FlutterInstaller's loadVersionMap method
+
+### ✅ Tested Scenarios
+
+* ✓ Global installation from pub.dev
+* ✓ Path-activated local development
+* ✓ Running with `--original --install-flutter` flags
+* ✓ FVM integration with auto-detection
+
 ## 1.2.2
 
 ### 📈 Pub Points Improvement (130 → 160 points)
