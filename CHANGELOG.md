@@ -1,3 +1,53 @@
+## 1.2.0
+
+### 🎯 Major Features
+
+* **NEW: `--original` flag** - Automatically detects and uses the project's original Flutter version from `.metadata`
+* **NEW: `--install-flutter` flag** - Auto-installs detected Flutter version using FVM
+* **Complete version map** - Added all 176 stable Flutter versions from v1.0.0 to 3.38.1
+* **Smart version detection** - Reads `.metadata` file to determine original Flutter version used during project creation
+
+### 🔧 Improvements
+
+* Updated compatibility matrix with corrected AGP, Gradle, and Kotlin versions:
+  - Flutter 3.24.x: Kotlin 2.0.0 → 2.0.10 for better stability
+  - Flutter 3.22.x: AGP 8.1.0 → 8.3.0, Gradle 8.3 → 8.5, Kotlin 1.9.0 → 1.9.24
+  - Flutter 3.19.x: AGP 8.0.0 → 8.1.4 (deprecated version removed), compile_sdk 33 → 34
+  - Flutter 3.16.x: AGP 7.4.0 → 8.1.4, Gradle 7.6 → 8.3, Kotlin 1.8.0 → 1.9.0, compile_sdk 33 → 34
+  - Flutter 3.13.x: AGP 7.3.0 → 7.4.2, Gradle 7.5 → 7.6, Kotlin 1.7.10 → 1.8.22
+* Fixed type casting issues when reading version map (int vs string handling)
+* Improved version comparison logic to handle semantic versions with "v" prefix and hotfix suffixes
+* Enhanced FVM integration with automatic project configuration via `.fvm/fvm_config.json`
+
+### 📚 Documentation
+
+* Completely redesigned README with practical workflow examples
+* Added "Most Common Use Cases" section with 3 clear scenarios
+* Detailed command reference with all available flags
+* Real-world examples for cloning and running projects
+* Clear explanation of `--original` flag benefits
+* Pro tips for version management and troubleshooting
+
+### 🐛 Bug Fixes
+
+* Fixed version map type handling for SDK values (min_sdk, compile_sdk, target_sdk)
+* Fixed version string parsing for versions with "+" or "v" characters
+* Improved error handling when Flutter is not installed
+
+### 💡 Usage Examples
+
+One-command solution for cloned projects:
+```bash
+flutterfix sync --original --install-flutter
+```
+
+This automatically:
+- Detects original Flutter version from `.metadata`
+- Installs that version using FVM
+- Applies version-compatible Gradle, AGP, Kotlin configs
+- Configures `.fvm/fvm_config.json`
+- Cleans caches and updates dependencies
+
 ## 1.1.2
 
 * Added automatic PATH configuration for standalone Flutter installations
