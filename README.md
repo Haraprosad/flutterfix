@@ -56,134 +56,283 @@ flutterfix --version
 
 ## 🎯 Quick Start
 
-### Basic Usage
+### 🚀 Most Common Use Cases
 
-Navigate to your Flutter project and run:
+#### **Scenario 1: Use Project's Original Flutter Version** (Recommended)
+
+Perfect for cloned projects - preserves the exact development environment:
 
 ```bash
-flutterfix
+cd /path/to/your/flutter/project
+
+# One command to detect, install, and configure everything
+flutterfix sync --original --install-flutter
 ```
 
-That's it! The tool will:
-1. 🔍 Analyze your project
-2. 🔧 Fix version conflicts
-3. 🧹 Clean build caches
-4. ✅ Make your project ready to run
+**What this does:**
+1. 🔍 Detects original Flutter version from `.metadata` file
+2. 📦 Auto-installs that Flutter version using FVM
+3. ⚙️ Configures `.fvm/fvm_config.json` to use that version
+4. 🔧 Applies version-compatible Gradle, AGP, and Kotlin configs
+5. 🧹 Cleans caches and updates dependencies
 
-### Install Compatible Flutter Version
-
-**Auto-install based on project requirements:**
+**Then run your app:**
 ```bash
+fvm flutter run
+```
+
+---
+
+#### **Scenario 2: Upgrade to Latest Flutter & Compatible Configs**
+
+Use the newest Flutter version with optimal build tool versions:
+
+```bash
+cd /path/to/your/flutter/project
+
+# Install latest Flutter version
 flutterfix install
+
+# Apply latest compatible configurations
+flutterfix sync
 ```
 
-This will:
-1. 🔍 Detect your project's Flutter version requirement
-2. 📦 Install FVM (Flutter Version Management) if needed
-3. ⬇️ Download and install the compatible Flutter version
-4. 🔧 Configure your project to use the installed version
-
-**List all available Flutter versions:**
+**Then run:**
 ```bash
+flutter run
+```
+
+---
+
+#### **Scenario 3: Quick Fix Without Installing Flutter**
+
+Already have Flutter installed? Just fix the build configuration:
+
+```bash
+cd /path/to/your/flutter/project
+
+flutterfix sync
+```
+
+This updates Gradle, AGP, Kotlin, and SDK versions to match your current Flutter version.
+
+---
+
+### 📋 Detailed Command Reference
+
+#### **Sync Command**
+
+Fix version conflicts and apply compatible configurations:
+
+```bash
+# Use current Flutter version
+flutterfix sync
+
+# Use original Flutter version (from .metadata)
+flutterfix sync --original
+
+# Use original version + auto-install if not present
+flutterfix sync --original --install-flutter
+
+# Sync specific project path
+flutterfix sync --path /path/to/project
+```
+
+#### **Install Command**
+
+Install Flutter versions:
+
+```bash
+# Auto-detect and install project's required version
+flutterfix install
+
+# List all available Flutter versions (176 stable versions)
 flutterfix install --list
-```
 
-**Install a specific Flutter version:**
-```bash
+# Install specific version
 flutterfix install --version 3.24
-```
 
-**Show version compatibility information:**
-```bash
+# Show version compatibility info
 flutterfix install --version 3.24 --info
+
+# Install without FVM (standalone mode)
+flutterfix install --version 3.24 --no-fvm
 ```
 
-### Common Use Cases
+#### **Other Commands**
 
-**Fix a specific project:**
 ```bash
-flutterfix sync --path /path/to/flutter/project
-```
-
-**Install compatible Flutter version:**
-```bash
-flutterfix install
-```
-
-**List available Flutter versions:**
-```bash
-flutterfix install --list
-```
-
-**Install specific Flutter version:**
-```bash
-flutterfix install --version 3.24
-```
-
-**Diagnose without fixing:**
-```bash
+# Diagnose project without fixing
 flutterfix doctor
-```
 
-**Rollback changes (restore from backup):**
-```bash
+# Rollback last changes (interactive)
 flutterfix rollback
-```
 
-**List all backups:**
-```bash
-flutterfix rollback --list
-```
-
-**Restore latest backup:**
-```bash
+# Rollback latest backup automatically
 flutterfix rollback --latest
-```
 
-**Upgrade FlutterFix:**
-```bash
+# List all backups
+flutterfix rollback --list
+
+# Restore specific backup by ID
+flutterfix rollback --id <backup-id>
+
+# Upgrade FlutterFix itself
 flutterfix upgrade
-```
 
-**Get help:**
-```bash
+# Show help
 flutterfix --help
 ```
 
-### Rollback & Backup System
+---
 
-FlutterFix automatically creates backups before modifying any files. You can easily restore previous versions:
+### 🎓 Installation Modes Explained
 
-**Undo last changes (interactive):**
+FlutterFix supports two installation modes for Flutter:
+
+#### **1. FVM Mode** (Recommended)
+- Uses [FVM (Flutter Version Management)](https://fvm.app/)
+- Auto-installs FVM if not present
+- Manages multiple Flutter versions per project
+- Creates `.fvm/fvm_config.json` in your project
+- **Run apps with:** `fvm flutter run`
+- **Check version:** `fvm flutter --version`
+
+#### **2. Standalone Mode** (Fallback)
+- Direct git clone from Flutter repository
+- Installs to `~/flutter-versions/[version]`
+- **Auto-configures PATH** on macOS/Linux/Windows
+- No FVM dependency
+- **Run apps with:** `flutter run`
+- Triggered with `--no-fvm` flag
+
+---
+
+### 💡 Pro Tips
+
+**Check which Flutter version will be used:**
 ```bash
-flutterfix rollback
+# For FVM projects
+fvm flutter --version
+
+# For standalone/system Flutter
+flutter --version
 ```
 
-**List all backups:**
+**Switch between Flutter versions:**
 ```bash
-flutterfix rollback --list
+# List all installed versions
+fvm list
+
+# Use different version
+fvm use 3.24.5
+
+# Run with specific version
+fvm flutter run
 ```
 
-**Restore most recent backup:**
+**Clean everything before running:**
 ```bash
+fvm flutter clean
+fvm flutter pub get
+fvm flutter run
+```
+
+---
+
+## 📚 Complete Workflow Examples
+
+### 🎯 Example 1: Clone & Run Any Flutter Project
+
+```bash
+# Clone a Flutter project
+git clone https://github.com/example/flutter-app.git
+cd flutter-app
+
+# One command to set up everything
+flutterfix sync --original --install-flutter
+
+# Run the app with the correct Flutter version
+fvm flutter run
+```
+
+**What happened:**
+- ✅ Detected Flutter 3.24.5 from `.metadata`
+- ✅ Installed Flutter 3.24.5 using FVM
+- ✅ Configured `.fvm/fvm_config.json`
+- ✅ Applied Gradle 8.7, AGP 8.5.0, Kotlin 2.0.10
+- ✅ Cleaned caches and updated dependencies
+
+---
+
+### 🎯 Example 2: Fix Build Errors on Existing Project
+
+```bash
+cd /path/to/your/project
+
+# Just fix the configuration
+flutterfix sync
+
+# Run with your current Flutter version
+flutter run
+```
+
+---
+
+### 🎯 Example 3: Upgrade Project to Latest Flutter
+
+```bash
+cd /path/to/your/project
+
+# Install latest Flutter (3.38.1)
+flutterfix install --version 3.38
+
+# Apply latest compatible configs
+flutterfix sync
+
+# Run with the new version
+fvm flutter run
+```
+
+---
+
+### 🎯 Example 4: Rollback If Something Goes Wrong
+
+```bash
+# Undo the last changes
 flutterfix rollback --latest
-```
 
-**Restore specific backup by ID:**
-```bash
+# Or choose from available backups
+flutterfix rollback --list
 flutterfix rollback --id <backup-id>
 ```
 
-**Clear all backups:**
-```bash
-flutterfix rollback --clear
-```
+---
 
-Backups are stored in `.flutterfix/backups/` directory within your project. Each backup includes:
-- Original file path
-- Timestamp
-- Description of changes
-- Unique backup ID
+## 🔍 Understanding `--original` Flag
+
+The `--original` flag is the **recommended approach** for cloned projects:
+
+### Without `--original` (uses current system Flutter):
+```bash
+flutterfix sync
+```
+- Uses whatever Flutter version is currently active
+- Applies compatible configs for that version
+- May upgrade/downgrade build tools
+
+### With `--original` (uses project's intended Flutter):
+```bash
+flutterfix sync --original --install-flutter
+```
+- Reads `.metadata` to find original Flutter version
+- Installs that exact version
+- Applies version-specific compatible configs
+- **Preserves original development environment**
+
+**Key difference:** `--original` ensures you use the same Flutter version the project was built with!
+
+---
 
 ---
 
@@ -192,13 +341,15 @@ Backups are stored in `.flutterfix/backups/` directory within your project. Each
 | Feature | Description |
 |---------|-------------|
 | 🎯 **Smart Version Detection** | Automatically detects Flutter, Gradle, Kotlin, and Java versions |
-| � **Flutter Auto-Install** | Installs compatible Flutter version using FVM or standalone |
-| �🔄 **Compatibility Matrix** | Uses tested compatibility mappings for seamless fixes |
+| 📦 **Flutter Auto-Install** | Installs compatible Flutter version using FVM or standalone |
+|  **Compatibility Matrix** | Supports Flutter 2.0 to 3.38 with tested compatibility mappings |
+| 🛣️ **Auto PATH Config** | Automatically configures shell PATH for standalone installations |
 | 📝 **Auto-Configuration** | Updates `build.gradle`, `gradle-wrapper.properties`, and SDK settings |
 | 🔙 **Automatic Backups** | Creates backups before making changes - rollback anytime |
 | 🧹 **Cache Cleaning** | Removes stale build artifacts that cause issues |
 | 📊 **Detailed Reports** | Shows what was fixed and what needs attention |
 | 💡 **Zero Config** | Works out of the box with sensible defaults |
+| 🌍 **Cross-Platform** | Supports macOS, Linux, and Windows |
 
 ---
 
@@ -230,10 +381,13 @@ Backups are stored in `.flutterfix/backups/` directory within your project. Each
 - Clears Gradle cache
 
 ### 6. Flutter Version Management
-- Auto-installs compatible Flutter version
-- Uses FVM (Flutter Version Management) for easy switching
-- Supports standalone installations
-- Lists available Flutter versions
+- **Auto-installs compatible Flutter version** based on project requirements
+- Uses **FVM (Flutter Version Management)** for easy version switching
+- **Fallback to standalone** installation if FVM is unavailable
+- **Auto-configures PATH** for standalone installations (macOS/Linux/Windows)
+- Lists all available Flutter versions with compatibility info
+- Install specific versions manually
+- Supports Flutter 2.0.x to 3.38.x (all stable versions)
 
 ### 7. Backup & Rollback System
 - **Automatic backups** before any file modifications
@@ -297,21 +451,40 @@ You can now run: flutter run
 
 ## 🧪 Compatibility Matrix
 
+FlutterFix supports **176 Flutter stable versions** from v1.0.0 to 3.38.1. Below are the major version families:
+
 | Flutter | Gradle | AGP | Kotlin | Java | Min SDK | Compile/Target SDK |
 |---------|--------|-----|--------|------|---------|-------------------|
-| 3.38.x | 8.9 | 8.7.0 | 2.0.20 | 17+ | 21 | 35 |
-| 3.35.x | 8.8 | 8.6.0 | 2.0.10 | 17+ | 21 | 35 |
-| 3.32.x | 8.7 | 8.5.0 | 2.0.0 | 17+ | 21 | 35 |
-| 3.29.x | 8.6 | 8.4.0 | 1.9.24 | 17+ | 21 | 34 |
-| 3.27.x | 8.5 | 8.3.0 | 1.9.22 | 17+ | 21 | 34 |
-| 3.24.x | 8.3 | 8.1.0 | 1.9.0 | 17+ | 21 | 34 |
-| 3.22.x | 8.0 | 8.0.0 | 1.8.22 | 17+ | 21 | 34 |
-| 3.19.x | 7.6 | 7.4.0 | 1.8.0 | 17+ | 21 | 33 |
-| 3.16.x | 7.5 | 7.3.0 | 1.7.10 | 11+ | 21 | 33 |
-| 3.13.x | 7.4 | 7.2.0 | 1.7.0 | 11+ | 21 | 33 |
-| 3.10.x | 7.3 | 7.1.0 | 1.6.10 | 11+ | 21 | 32 |
-| 3.7.x | 7.2 | 7.0.0 | 1.6.0 | 11+ | 21 | 31 |
-| 3.3.x | 6.7 | 4.1.0 | 1.5.31 | 11+ | 21 | 30 |
+| 3.38.x | 8.11 | 8.7.3 | 2.1.0 | 17+ | 24 | 35 |
+| 3.35.x | 8.10 | 8.7.2 | 2.0.21 | 17+ | 24 | 35 |
+| 3.32.x | 8.10 | 8.7.1 | 2.0.20 | 17+ | 24 | 35 |
+| 3.29.x | 8.9 | 8.7.0 | 2.0.10 | 17+ | 24 | 35 |
+| 3.27.x | 8.9 | 8.6.0 | 2.0.0 | 17+ | 24 | 35 |
+| 3.24.x | 8.7 | 8.5.0 | 2.0.10 | 17+ | 21 | 34 |
+| 3.22.x | 8.5 | 8.3.0 | 1.9.24 | 17+ | 21 | 34 |
+| 3.19.x | 8.3 | 8.1.4 | 1.9.0 | 17+ | 21 | 34 |
+| 3.16.x | 8.3 | 8.1.4 | 1.9.0 | 17+ | 21 | 34 |
+| 3.13.x | 7.6 | 7.4.2 | 1.8.22 | 17+ | 21 | 33 |
+| 3.10.x | 7.4 | 7.2.0 | 1.7.0 | 11+ | 21 | 32 |
+| 3.7.x | 7.3 | 7.1.0 | 1.6.10 | 11+ | 21 | 31 |
+| 3.3.x | 7.2 | 7.0.0 | 1.6.0 | 11+ | 21 | 30 |
+| 3.0.x | 7.0 | 4.2.0 | 1.5.31 | 11+ | 21 | 30 |
+| 2.10.x | 6.9 | 4.1.0 | 1.5.10 | 11+ | 21 | 30 |
+| 2.8.x | 6.7 | 4.1.0 | 1.5.0 | 11+ | 21 | 29 |
+| 2.5.x | 6.5 | 4.0.1 | 1.4.32 | 11+ | 16 | 29 |
+| 2.2.x | 6.3 | 3.6.4 | 1.4.0 | 11+ | 16 | 29 |
+| 2.0.x | 6.3 | 3.6.4 | 1.4.0 | 11+ | 16 | 29 |
+
+**All patch versions supported** (e.g., 3.7.0, 3.7.1, ..., 3.7.12, 3.24.0, ..., 3.24.5, etc.)
+
+### Recent Compatibility Updates (Nov 2025)
+- ✅ **Flutter 3.16.x**: Updated to AGP 8.1.4, Gradle 8.3, Kotlin 1.9.0 for Android 14 support
+- ✅ **Flutter 3.19.x**: Upgraded from deprecated AGP 8.0.0 to 8.1.4 with compile_sdk 34
+- ✅ **Flutter 3.22.x**: Enhanced with AGP 8.3.0, Kotlin 1.9.24 for better Kotlin 2.0 compatibility
+- ✅ **Flutter 3.24.x**: Updated to Kotlin 2.0.10 for improved stability
+- ✅ **Flutter 3.13.x**: Upgraded to AGP 7.4.2 for better reliability
+
+All versions tested and verified with official Flutter/Android requirements.
 
 ---
 

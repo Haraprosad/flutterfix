@@ -6,7 +6,20 @@ import 'package:flutterfix/flutterfix.dart';
 void main(List<String> arguments) async {
   final parser = ArgParser()
     ..addCommand('doctor')
-    ..addCommand('sync')
+    ..addCommand(
+        'sync',
+        ArgParser()
+          ..addFlag(
+            'original',
+            negatable: false,
+            help:
+                'Use original Flutter version from .metadata and apply compatible configs',
+          )
+          ..addFlag(
+            'install-flutter',
+            negatable: false,
+            help: 'Auto-install detected Flutter version if not present',
+          ))
     ..addCommand('upgrade')
     ..addCommand(
         'install',
@@ -123,7 +136,12 @@ Future<void> _executeCommand(
       break;
 
     case 'sync':
-      final syncCmd = SyncCommand(logger, projectPath);
+      final syncCmd = SyncCommand(
+        logger,
+        projectPath,
+        useOriginal: command['original'] as bool,
+        autoInstallFlutter: command['install-flutter'] as bool,
+      );
       await syncCmd.execute();
       break;
 

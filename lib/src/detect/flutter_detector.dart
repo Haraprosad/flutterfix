@@ -159,4 +159,42 @@ class FlutterDetector {
     final match = RegExp(r'>=(\d+\.\d+\.\d+)').firstMatch(constraint);
     return match?.group(1);
   }
+
+  /// Detect original Flutter version from .metadata file
+  static Future<String?> detectOriginalVersion(String projectPath) async {
+    final metadataPath = p.join(projectPath, '.metadata');
+
+    if (!FileUtils.fileExists(metadataPath)) {
+      return null;
+    }
+
+    try {
+      final content = await FileUtils.readFile(metadataPath);
+      final yaml = loadYaml(content) as Map;
+
+      // Get the revision from .metadata
+      final version = yaml['version'] as Map?;
+      final revision = version?['revision']?.toString();
+
+      if (revision == null) return null;
+
+      // Map known revisions to Flutter versions
+      // This is a simplified mapping - in production, you'd query Flutter's git repo
+      final revisionMap = {
+        '2663184aa79047d0a33a14a3b607954f8fdd8730': '3.24.5',
+        'ac4e799d23': '3.35.5',
+        // Add more mappings as needed
+      };
+
+      // Check if we have a direct mapping
+      if (revisionMap.containsKey(revision)) {
+        return revisionMap[revision];
+      }
+
+      // If no direct mapping, try to extract from pubspec.yaml SDK constraint
+      return await getRecommendedVersion(projectPath);
+    } catch (e) {
+      return null;
+    }
+  }
 }

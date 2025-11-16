@@ -6,19 +6,33 @@ import '../patcher/agp_patcher.dart';
 import '../patcher/kotlin_patcher.dart';
 import '../utils/file_utils.dart';
 import '../runner/process_runner.dart';
+import '../installer/flutter_installer.dart';
 
 class SyncCommand {
   final Logger logger;
   final String projectPath;
+  final bool useOriginal;
+  final bool autoInstallFlutter;
   late Map<String, dynamic> versionMap;
 
-  SyncCommand(this.logger, this.projectPath);
+  SyncCommand(
+    this.logger,
+    this.projectPath, {
+    this.useOriginal = false,
+    this.autoInstallFlutter = false,
+  });
 
   Future<void> execute() async {
     _printHeader();
 
     // Load version compatibility map
     await _loadVersionMap();
+
+    // Handle --original flag
+    if (useOriginal) {
+      await _executeWithOriginalVersion();
+      return;
+    }
 
     // Detect versions
     final flutterInfo = await FlutterDetector.detectInstalled();
@@ -45,6 +59,110 @@ class SyncCommand {
     _printSummary(fixed, warnings, errors);
   }
 
+  Future<void> _executeWithOriginalVersion() async {
+    logger.info('🔍 Detecting original Flutter version from .metadata...\n');
+
+    // Detect original version
+    final originalVersion =
+        await FlutterDetector.detectOriginalVersion(projectPath);
+
+    if (originalVersion == null) {
+      logger
+          .warn('⚠️  Could not detect original Flutter version from .metadata');
+      logger.info('💡 Falling back to SDK constraint from pubspec.yaml\n');
+
+      final recommended =
+          await FlutterDetector.getRecommendedVersion(projectPath);
+      if (recommended == null) {
+        logger.err('❌ Could not determine Flutter version');
+        logger
+            .info('💡 Try running: flutterfix sync (without --original flag)');
+        return;
+      }
+
+      logger.info('📦 Recommended version: $recommended\n');
+      await _handleFlutterInstallation(recommended);
+    } else {
+      logger.success('✅ Original Flutter version detected: $originalVersion\n');
+      await _handleFlutterInstallation(originalVersion);
+    }
+
+    // Now sync with the detected/installed version
+    final flutterInfo = await FlutterDetector.detectInstalled();
+    if (!flutterInfo.isInstalled) {
+      logger.err('❌ Flutter not installed');
+      return;
+    }
+
+    logger.info('📦 Using Flutter ${flutterInfo.version}\n');
+
+    final fixed = <String>[];
+    final warnings = <String>[];
+    final errors = <String>[];
+
+    // Fix Android with version-specific configs
+    if (FileUtils.hasAndroidFolder(projectPath)) {
+      await _fixAndroid(flutterInfo, fixed, warnings, errors);
+    }
+
+    // Clean and refresh
+    await _cleanAndRefresh(fixed, warnings);
+
+    // Print summary
+    _printSummary(fixed, warnings, errors);
+  }
+
+  Future<void> _handleFlutterInstallation(String version) async {
+    if (autoInstallFlutter) {
+      logger.info('📥 Installing Flutter $version...\n');
+
+      final installer = FlutterInstaller(logger);
+      await installer.loadVersionMap();
+
+      // Resolve to stable version
+      final stableVersion = await installer.resolveToStableVersion(version);
+
+      // Try FVM first
+      final hasFvm = await installer.isFvmInstalled();
+      bool success = false;
+
+      if (hasFvm) {
+        logger.info('🔧 Installing with FVM...');
+        success = await installer.installWithFvm(stableVersion);
+
+        if (success) {
+          // Use the version in the project
+          await installer.useVersionInProject(projectPath, stableVersion);
+        }
+      } else {
+        logger.info('🔧 FVM not found, installing FVM first...');
+        final fvmInstalled = await installer.installFvm();
+
+        if (fvmInstalled) {
+          success = await installer.installWithFvm(stableVersion);
+          if (success) {
+            await installer.useVersionInProject(projectPath, stableVersion);
+          }
+        } else {
+          logger.warn('⚠️  FVM installation failed, using standalone mode');
+          success = await installer.installStandalone(stableVersion);
+        }
+      }
+
+      if (!success) {
+        logger.err('❌ Failed to install Flutter $version');
+        return;
+      }
+
+      logger.success('✅ Flutter $stableVersion installed successfully\n');
+    } else {
+      logger.info('💡 To install Flutter $version automatically, run:');
+      logger.info('   flutterfix sync --original --install-flutter\n');
+      logger.info('   OR manually:');
+      logger.info('   fvm install $version && fvm use $version\n');
+    }
+  }
+
   Future<void> _fixAndroid(
     FlutterInfo flutterInfo,
     List<String> fixed,
@@ -57,7 +175,8 @@ class SyncCommand {
 
     // Fix Gradle
     final gradlePatcher = GradlePatcher(projectPath);
-    if (await gradlePatcher.updateWrapperVersion(versions['gradle']!)) {
+    if (await gradlePatcher
+        .updateWrapperVersion(versions['gradle'].toString())) {
       fixed.add('Gradle ${versions['gradle']}');
     }
 
@@ -66,25 +185,31 @@ class SyncCommand {
 
     // Fix AGP
     final agpPatcher = AgpPatcher(projectPath);
-    if (await agpPatcher.updateVersion(versions['agp']!)) {
+    if (await agpPatcher.updateVersion(versions['agp'].toString())) {
       fixed.add('AGP ${versions['agp']}');
     }
 
     await agpPatcher.ensureNamespace();
     await agpPatcher.updateSdkVersions(
-      minSdk: int.parse(versions['min_sdk']!),
-      compileSdk: int.parse(versions['compile_sdk']!),
-      targetSdk: int.parse(versions['target_sdk']!),
+      minSdk: versions['min_sdk'] is int
+          ? versions['min_sdk'] as int
+          : int.parse(versions['min_sdk']!),
+      compileSdk: versions['compile_sdk'] is int
+          ? versions['compile_sdk'] as int
+          : int.parse(versions['compile_sdk']!),
+      targetSdk: versions['target_sdk'] is int
+          ? versions['target_sdk'] as int
+          : int.parse(versions['target_sdk']!),
     );
     await agpPatcher.fixCompileOptions();
 
     // Fix Kotlin
     final kotlinPatcher = KotlinPatcher(projectPath);
-    if (await kotlinPatcher.updateVersion(versions['kotlin']!)) {
+    if (await kotlinPatcher.updateVersion(versions['kotlin'].toString())) {
       fixed.add('Kotlin ${versions['kotlin']}');
     }
 
-    await kotlinPatcher.ensureKotlinPlugin(versions['kotlin']!);
+    await kotlinPatcher.ensureKotlinPlugin(versions['kotlin'].toString());
     await kotlinPatcher.applyKotlinAndroidPlugin();
     await kotlinPatcher.addKotlinOptions();
   }
@@ -126,21 +251,41 @@ class SyncCommand {
     versionMap = Map<String, dynamic>.from(yaml as Map);
   }
 
-  Map<String, String> _getCompatibleVersions(String flutterVersion) {
+  Map<String, dynamic> _getCompatibleVersions(String flutterVersion) {
     final compatibility = versionMap['flutter_compatibility'] as Map;
-    final defaults = Map<String, String>.from(versionMap['defaults'] as Map);
+    final defaults = Map<String, dynamic>.from(versionMap['defaults'] as Map);
+
+    // Normalize version for lookup (remove 'v' prefix and anything after '+')
+    String normalizeVersion(String version) {
+      return version.replaceFirst(RegExp(r'^v'), '').split('+').first;
+    }
+
+    final normalizedFlutter = normalizeVersion(flutterVersion);
 
     // Find exact or closest match
     if (compatibility.containsKey(flutterVersion)) {
-      return Map<String, String>.from(compatibility[flutterVersion] as Map);
+      return Map<String, dynamic>.from(compatibility[flutterVersion] as Map);
+    }
+    if (compatibility.containsKey(normalizedFlutter)) {
+      return Map<String, dynamic>.from(compatibility[normalizedFlutter] as Map);
     }
 
-    // Find closest version
+    // Try major.minor match (e.g., "3.5" for "3.5.3")
+    final parts = normalizedFlutter.split('.');
+    if (parts.length >= 2) {
+      final majorMinor = '${parts[0]}.${parts[1]}';
+      if (compatibility.containsKey(majorMinor)) {
+        return Map<String, dynamic>.from(compatibility[majorMinor] as Map);
+      }
+    }
+
+    // Find closest version using string comparison
     final versions = compatibility.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
+      ..sort((a, b) => b.toString().compareTo(a.toString()));
     for (var version in versions) {
-      if (double.parse(flutterVersion) >= double.parse(version)) {
-        return Map<String, String>.from(compatibility[version] as Map);
+      // Use string comparison for version ordering
+      if (normalizedFlutter.compareTo(version.toString()) >= 0) {
+        return Map<String, dynamic>.from(compatibility[version] as Map);
       }
     }
 

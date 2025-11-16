@@ -1,8 +1,11 @@
 # Flutter Version Compatibility Matrix
 # Maps Flutter versions to compatible Gradle, AGP, Kotlin, and Java versions
+# Includes all stable versions from FVM for precise version matching
 
 flutter_compatibility:
-  "3.38":
+  # Flutter 3.38.x
+  "3.38.1":
+    stable_version: "3.38.1"
     gradle: "8.11"
     agp: "8.7.3"
     kotlin: "2.1.0"
@@ -11,7 +14,29 @@ flutter_compatibility:
     compile_sdk: 35
     target_sdk: 35
 
-  "3.35":
+  "3.38.0":
+    stable_version: "3.38.0"
+    gradle: "8.11"
+    agp: "8.7.3"
+    kotlin: "2.1.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.38":
+    stable_version: "3.38.1"
+    gradle: "8.11"
+    agp: "8.7.3"
+    kotlin: "2.1.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  # Flutter 3.35.x
+  "3.35.7":
+    stable_version: "3.35.7"
     gradle: "8.10"
     agp: "8.7.2"
     kotlin: "2.0.21"
@@ -20,7 +45,89 @@ flutter_compatibility:
     compile_sdk: 35
     target_sdk: 35
 
-  "3.32":
+  "3.35.6":
+    stable_version: "3.35.6"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35.5":
+    stable_version: "3.35.5"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35.4":
+    stable_version: "3.35.4"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35.3":
+    stable_version: "3.35.3"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35.2":
+    stable_version: "3.35.2"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35.1":
+    stable_version: "3.35.1"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35.0":
+    stable_version: "3.35.0"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.35":
+    stable_version: "3.35.7"
+    gradle: "8.10"
+    agp: "8.7.2"
+    kotlin: "2.0.21"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  # Flutter 3.32.x
+  "3.32.8":
+    stable_version: "3.32.8"
     gradle: "8.10"
     agp: "8.7.1"
     kotlin: "2.0.20"
@@ -29,7 +136,99 @@ flutter_compatibility:
     compile_sdk: 35
     target_sdk: 35
 
-  "3.29":
+  "3.32.7":
+    stable_version: "3.32.7"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.6":
+    stable_version: "3.32.6"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.5":
+    stable_version: "3.32.5"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.4":
+    stable_version: "3.32.4"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.3":
+    stable_version: "3.32.3"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.2":
+    stable_version: "3.32.2"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.1":
+    stable_version: "3.32.1"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32.0":
+    stable_version: "3.32.0"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.32":
+    stable_version: "3.32.8"
+    gradle: "8.10"
+    agp: "8.7.1"
+    kotlin: "2.0.20"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  # Flutter 3.29.x
+  "3.29.3":
+    stable_version: "3.29.3"
     gradle: "8.9"
     agp: "8.7.0"
     kotlin: "2.0.10"
@@ -38,7 +237,49 @@ flutter_compatibility:
     compile_sdk: 35
     target_sdk: 35
 
-  "3.27":
+  "3.29.2":
+    stable_version: "3.29.2"
+    gradle: "8.9"
+    agp: "8.7.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.29.1":
+    stable_version: "3.29.1"
+    gradle: "8.9"
+    agp: "8.7.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.29.0":
+    stable_version: "3.29.0"
+    gradle: "8.9"
+    agp: "8.7.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.29":
+    stable_version: "3.29.3"
+    gradle: "8.9"
+    agp: "8.7.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  # Flutter 3.27.x
+  "3.27.4":
+    stable_version: "3.27.4"
     gradle: "8.9"
     agp: "8.6.0"
     kotlin: "2.0.0"
@@ -47,18 +288,243 @@ flutter_compatibility:
     compile_sdk: 35
     target_sdk: 35
 
-  "3.24":
+  "3.27.3":
+    stable_version: "3.27.3"
+    gradle: "8.9"
+    agp: "8.6.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.27.2":
+    stable_version: "3.27.2"
+    gradle: "8.9"
+    agp: "8.6.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.27.1":
+    stable_version: "3.27.1"
+    gradle: "8.9"
+    agp: "8.6.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.27.0":
+    stable_version: "3.27.0"
+    gradle: "8.9"
+    agp: "8.6.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  "3.27":
+    stable_version: "3.27.4"
+    gradle: "8.9"
+    agp: "8.6.0"
+    kotlin: "2.0.0"
+    java: "17"
+    min_sdk: 24
+    compile_sdk: 35
+    target_sdk: 35
+
+  # Flutter 3.24.x
+  "3.24.5":
+    stable_version: "3.24.5"
     gradle: "8.7"
     agp: "8.5.0"
-    kotlin: "2.0.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24.4":
+    stable_version: "3.24.4"
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24.3":
+    stable_version: "3.24.3"
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24.2":
+    stable_version: "3.24.2"
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24.1":
+    stable_version: "3.24.1"
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24.0":
+    stable_version: "3.24.0"
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.24":
+    stable_version: "3.24.5"
+    gradle: "8.7"
+    agp: "8.5.0"
+    kotlin: "2.0.10"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  # Flutter 3.22.x
+  "3.22.3":
+    stable_version: "3.22.3"
+    gradle: "8.5"
+    agp: "8.3.0"
+    kotlin: "1.9.24"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.22.2":
+    stable_version: "3.22.2"
+    gradle: "8.5"
+    agp: "8.3.0"
+    kotlin: "1.9.24"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.22.1":
+    stable_version: "3.22.1"
+    gradle: "8.5"
+    agp: "8.3.0"
+    kotlin: "1.9.24"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.22.0":
+    stable_version: "3.22.0"
+    gradle: "8.5"
+    agp: "8.3.0"
+    kotlin: "1.9.24"
     java: "17"
     min_sdk: 21
     compile_sdk: 34
     target_sdk: 34
 
   "3.22":
+    stable_version: "3.22.3"
+    gradle: "8.5"
+    agp: "8.3.0"
+    kotlin: "1.9.24"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  # Flutter 3.19.x
+  "3.19.6":
+    stable_version: "3.19.6"
     gradle: "8.3"
-    agp: "8.1.0"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19.5":
+    stable_version: "3.19.5"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19.4":
+    stable_version: "3.19.4"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19.3":
+    stable_version: "3.19.3"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19.2":
+    stable_version: "3.19.2"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19.1":
+    stable_version: "3.19.1"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.19.0":
+    stable_version: "3.19.0"
+    gradle: "8.3"
+    agp: "8.1.4"
     kotlin: "1.9.0"
     java: "17"
     min_sdk: 21
@@ -66,33 +532,240 @@ flutter_compatibility:
     target_sdk: 34
 
   "3.19":
-    gradle: "8.0"
-    agp: "8.0.0"
-    kotlin: "1.8.22"
+    stable_version: "3.19.6"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
     java: "17"
     min_sdk: 21
     compile_sdk: 33
     target_sdk: 33
+
+  # Flutter 3.16.x
+  "3.16.9":
+    stable_version: "3.16.9"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.8":
+    stable_version: "3.16.8"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.7":
+    stable_version: "3.16.7"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.6":
+    stable_version: "3.16.6"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.5":
+    stable_version: "3.16.5"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.4":
+    stable_version: "3.16.4"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.3":
+    stable_version: "3.16.3"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.2":
+    stable_version: "3.16.2"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.1":
+    stable_version: "3.16.1"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
+
+  "3.16.0":
+    stable_version: "3.16.0"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
+    java: "17"
+    min_sdk: 21
+    compile_sdk: 34
+    target_sdk: 34
 
   "3.16":
-    gradle: "7.6"
-    agp: "7.4.0"
-    kotlin: "1.8.0"
+    stable_version: "3.16.9"
+    gradle: "8.3"
+    agp: "8.1.4"
+    kotlin: "1.9.0"
     java: "17"
     min_sdk: 21
     compile_sdk: 33
     target_sdk: 33
 
-  "3.13":
-    gradle: "7.5"
-    agp: "7.3.0"
-    kotlin: "1.7.10"
+  # Flutter 3.13.x
+  "3.13.9":
+    stable_version: "3.13.9"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
     java: "11"
     min_sdk: 21
     compile_sdk: 33
     target_sdk: 33
 
-  "3.10":
+  "3.13.8":
+    stable_version: "3.13.8"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.7":
+    stable_version: "3.13.7"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.6":
+    stable_version: "3.13.6"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.5":
+    stable_version: "3.13.5"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.4":
+    stable_version: "3.13.4"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.3":
+    stable_version: "3.13.3"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.2":
+    stable_version: "3.13.2"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.1":
+    stable_version: "3.13.1"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13.0":
+    stable_version: "3.13.0"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  "3.13":
+    stable_version: "3.13.9"
+    gradle: "7.6"
+    agp: "7.4.2"
+    kotlin: "1.8.22"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 33
+    target_sdk: 33
+
+  # Flutter 3.10.x
+  "3.10.6":
+    stable_version: "3.10.6"
     gradle: "7.4"
     agp: "7.2.0"
     kotlin: "1.7.0"
@@ -101,7 +774,79 @@ flutter_compatibility:
     compile_sdk: 32
     target_sdk: 32
 
-  "3.7":
+  "3.10.5":
+    stable_version: "3.10.5"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.10.4":
+    stable_version: "3.10.4"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.10.3":
+    stable_version: "3.10.3"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.10.2":
+    stable_version: "3.10.2"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.10.1":
+    stable_version: "3.10.1"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.10.0":
+    stable_version: "3.10.0"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  "3.10":
+    stable_version: "3.10.6"
+    gradle: "7.4"
+    agp: "7.2.0"
+    kotlin: "1.7.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 32
+    target_sdk: 32
+
+  # Flutter 3.7.x
+  "3.7.12":
+    stable_version: "3.7.12"
     gradle: "7.3"
     agp: "7.1.0"
     kotlin: "1.6.10"
@@ -110,7 +855,139 @@ flutter_compatibility:
     compile_sdk: 31
     target_sdk: 31
 
-  "3.3":
+  "3.7.11":
+    stable_version: "3.7.11"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.10":
+    stable_version: "3.7.10"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.9":
+    stable_version: "3.7.9"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.8":
+    stable_version: "3.7.8"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.7":
+    stable_version: "3.7.7"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.6":
+    stable_version: "3.7.6"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.5":
+    stable_version: "3.7.5"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.4":
+    stable_version: "3.7.4"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.3":
+    stable_version: "3.7.3"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.2":
+    stable_version: "3.7.2"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.1":
+    stable_version: "3.7.1"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7.0":
+    stable_version: "3.7.0"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  "3.7":
+    stable_version: "3.7.12"
+    gradle: "7.3"
+    agp: "7.1.0"
+    kotlin: "1.6.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 31
+    target_sdk: 31
+
+  # Flutter 3.3.x
+  "3.3.10":
+    stable_version: "3.3.10"
     gradle: "7.2"
     agp: "7.0.0"
     kotlin: "1.6.0"
@@ -119,7 +996,119 @@ flutter_compatibility:
     compile_sdk: 30
     target_sdk: 30
 
-  "3.0":
+  "3.3.9":
+    stable_version: "3.3.9"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.8":
+    stable_version: "3.3.8"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.7":
+    stable_version: "3.3.7"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.6":
+    stable_version: "3.3.6"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.5":
+    stable_version: "3.3.5"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.4":
+    stable_version: "3.3.4"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.3":
+    stable_version: "3.3.3"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.2":
+    stable_version: "3.3.2"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.1":
+    stable_version: "3.3.1"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3.0":
+    stable_version: "3.3.0"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.3":
+    stable_version: "3.3.10"
+    gradle: "7.2"
+    agp: "7.0.0"
+    kotlin: "1.6.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  # Flutter 3.0.x
+  "3.0.5":
+    stable_version: "3.0.5"
     gradle: "7.0"
     agp: "4.2.0"
     kotlin: "1.5.31"
@@ -128,7 +1117,69 @@ flutter_compatibility:
     compile_sdk: 30
     target_sdk: 30
 
-  "2.10":
+  "3.0.4":
+    stable_version: "3.0.4"
+    gradle: "7.0"
+    agp: "4.2.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.0.3":
+    stable_version: "3.0.3"
+    gradle: "7.0"
+    agp: "4.2.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.0.2":
+    stable_version: "3.0.2"
+    gradle: "7.0"
+    agp: "4.2.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.0.1":
+    stable_version: "3.0.1"
+    gradle: "7.0"
+    agp: "4.2.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.0.0":
+    stable_version: "3.0.0"
+    gradle: "7.0"
+    agp: "4.2.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "3.0":
+    stable_version: "3.0.5"
+    gradle: "7.0"
+    agp: "4.2.0"
+    kotlin: "1.5.31"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  # Flutter 2.10.x
+  "2.10.5":
+    stable_version: "2.10.5"
     gradle: "6.9"
     agp: "4.1.0"
     kotlin: "1.5.10"
@@ -137,7 +1188,69 @@ flutter_compatibility:
     compile_sdk: 30
     target_sdk: 30
 
-  "2.8":
+  "2.10.4":
+    stable_version: "2.10.4"
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "2.10.3":
+    stable_version: "2.10.3"
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "2.10.2":
+    stable_version: "2.10.2"
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "2.10.1":
+    stable_version: "2.10.1"
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "2.10.0":
+    stable_version: "2.10.0"
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  "2.10":
+    stable_version: "2.10.5"
+    gradle: "6.9"
+    agp: "4.1.0"
+    kotlin: "1.5.10"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 30
+    target_sdk: 30
+
+  # Flutter 2.8.x
+  "2.8.1":
+    stable_version: "2.8.1"
     gradle: "6.7"
     agp: "4.1.0"
     kotlin: "1.5.0"
@@ -146,7 +1259,29 @@ flutter_compatibility:
     compile_sdk: 29
     target_sdk: 29
 
-  "2.5":
+  "2.8.0":
+    stable_version: "2.8.0"
+    gradle: "6.7"
+    agp: "4.1.0"
+    kotlin: "1.5.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.8":
+    stable_version: "2.8.1"
+    gradle: "6.7"
+    agp: "4.1.0"
+    kotlin: "1.5.0"
+    java: "11"
+    min_sdk: 21
+    compile_sdk: 29
+    target_sdk: 29
+
+  # Flutter 2.5.x
+  "2.5.3":
+    stable_version: "2.5.3"
     gradle: "6.5"
     agp: "4.0.1"
     kotlin: "1.4.32"
@@ -155,7 +1290,160 @@ flutter_compatibility:
     compile_sdk: 29
     target_sdk: 29
 
+  "2.5.2":
+    stable_version: "2.5.2"
+    gradle: "6.5"
+    agp: "4.0.1"
+    kotlin: "1.4.32"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.5.1":
+    stable_version: "2.5.1"
+    gradle: "6.5"
+    agp: "4.0.1"
+    kotlin: "1.4.32"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.5.0":
+    stable_version: "2.5.0"
+    gradle: "6.5"
+    agp: "4.0.1"
+    kotlin: "1.4.32"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.5":
+    stable_version: "2.5.3"
+    gradle: "6.5"
+    agp: "4.0.1"
+    kotlin: "1.4.32"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  # Flutter 2.2.x
+  "2.2.3":
+    stable_version: "2.2.3"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.2.2":
+    stable_version: "2.2.2"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.2.1":
+    stable_version: "2.2.1"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.2.0":
+    stable_version: "2.2.0"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
   "2.2":
+    stable_version: "2.2.3"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  # Flutter 2.0.x
+  "2.0.6":
+    stable_version: "2.0.6"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0.5":
+    stable_version: "2.0.5"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0.4":
+    stable_version: "2.0.4"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0.3":
+    stable_version: "2.0.3"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0.2":
+    stable_version: "2.0.2"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0.1":
+    stable_version: "2.0.1"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.4.0"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "2.0.0":
+    stable_version: "2.0.0"
     gradle: "6.3"
     agp: "3.6.4"
     kotlin: "1.4.0"
@@ -165,6 +1453,7 @@ flutter_compatibility:
     target_sdk: 29
 
   "2.0":
+    stable_version: "2.0.6"
     gradle: "6.3"
     agp: "3.6.4"
     kotlin: "1.4.0"
@@ -172,6 +1461,335 @@ flutter_compatibility:
     min_sdk: 16
     compile_sdk: 29
     target_sdk: 29
+
+  # Flutter 1.22.x
+  "1.22.6":
+    stable_version: "1.22.6"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "1.22.5":
+    stable_version: "1.22.5"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "1.22.4":
+    stable_version: "1.22.4"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "1.22.3":
+    stable_version: "1.22.3"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "1.22.2":
+    stable_version: "1.22.2"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "1.22.1":
+    stable_version: "1.22.1"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  "1.22.0":
+    stable_version: "1.22.0"
+    gradle: "6.3"
+    agp: "3.6.4"
+    kotlin: "1.3.72"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 29
+    target_sdk: 29
+
+  # Flutter 1.20.x
+  "1.20.4":
+    stable_version: "1.20.4"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.20.3":
+    stable_version: "1.20.3"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.20.2":
+    stable_version: "1.20.2"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.20.1":
+    stable_version: "1.20.1"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.20.0":
+    stable_version: "1.20.0"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.17.x
+  "1.17.5":
+    stable_version: "1.17.5"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.17.4":
+    stable_version: "1.17.4"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.17.3":
+    stable_version: "1.17.3"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.17.2":
+    stable_version: "1.17.2"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.17.1":
+    stable_version: "1.17.1"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "1.17.0":
+    stable_version: "1.17.0"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.12.x
+  "v1.12.13+hotfix.9":
+    stable_version: "v1.12.13+hotfix.9"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.12.13+hotfix.8":
+    stable_version: "v1.12.13+hotfix.8"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.12.13+hotfix.7":
+    stable_version: "v1.12.13+hotfix.7"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.12.13+hotfix.5":
+    stable_version: "v1.12.13+hotfix.5"
+    gradle: "5.6.2"
+    agp: "3.5.0"
+    kotlin: "1.3.50"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.9.x
+  "v1.9.1+hotfix.6":
+    stable_version: "v1.9.1+hotfix.6"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.9.1+hotfix.5":
+    stable_version: "v1.9.1+hotfix.5"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.9.1+hotfix.4":
+    stable_version: "v1.9.1+hotfix.4"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.9.1+hotfix.2":
+    stable_version: "v1.9.1+hotfix.2"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.7.x
+  "v1.7.8+hotfix.4":
+    stable_version: "v1.7.8+hotfix.4"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.7.8+hotfix.3":
+    stable_version: "v1.7.8+hotfix.3"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  "v1.7.8+hotfix.2":
+    stable_version: "v1.7.8+hotfix.2"
+    gradle: "5.4.1"
+    agp: "3.4.0"
+    kotlin: "1.3.31"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.5.x
+  "v1.5.4-hotfix.2":
+    stable_version: "v1.5.4-hotfix.2"
+    gradle: "5.1.1"
+    agp: "3.3.0"
+    kotlin: "1.3.21"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.2.x
+  "v1.2.1":
+    stable_version: "v1.2.1"
+    gradle: "4.10.2"
+    agp: "3.2.1"
+    kotlin: "1.3.11"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
+
+  # Flutter 1.0.x
+  "v1.0.0":
+    stable_version: "v1.0.0"
+    gradle: "4.10.2"
+    agp: "3.2.1"
+    kotlin: "1.2.71"
+    java: "11"
+    min_sdk: 16
+    compile_sdk: 28
+    target_sdk: 28
 
 # Gradle to Java compatibility
 gradle_java_compatibility:
@@ -185,7 +1803,7 @@ gradle_java_compatibility:
   "8.3": "17"
   "8.0": "17"
   "7.6": "17"
-  "7.5": "11"
+  "7.5": "17"
   "7.4": "11"
   "7.3": "11"
   "7.2": "11"
@@ -194,6 +1812,10 @@ gradle_java_compatibility:
   "6.7": "11"
   "6.5": "11"
   "6.3": "11"
+  "5.6.2": "11"
+  "5.4.1": "11"
+  "5.1.1": "11"
+  "4.10.2": "11"
 
 # Default versions (fallback)
 defaults:

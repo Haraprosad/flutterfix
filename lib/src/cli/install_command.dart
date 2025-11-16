@@ -122,6 +122,18 @@ class InstallCommand {
         if (useInProject) {
           await installer.useVersionInProject(projectPath, version);
         }
+      } else {
+        // FVM installation failed, offer standalone as fallback
+        logger.info('');
+        final tryStandalone = logger.confirm(
+          '? Try standalone installation instead?',
+          defaultValue: true,
+        );
+
+        if (tryStandalone) {
+          logger.info('💡 Switching to standalone installation...\n');
+          await installer.installStandalone(version);
+        }
       }
     } else {
       // Standalone installation

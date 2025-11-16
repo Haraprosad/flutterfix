@@ -1,3 +1,12 @@
+## 1.1.2
+
+* Added automatic PATH configuration for standalone Flutter installations
+* Auto-detects shell type (zsh, bash, fish) and updates appropriate config file
+* Windows support: Automatically updates User PATH environment variable
+* Smart Flutter version detection based on Dart SDK constraints
+* Improved version matching algorithm for better compatibility
+* Enhanced error messages with helpful suggestions
+
 ## 1.1.1
 
 * Fixed critical bug: version_map.yaml now loads from FlutterFix package instead of user's project

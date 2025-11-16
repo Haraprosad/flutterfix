@@ -119,31 +119,77 @@ class FlutterInstaller {
       final projectInfo = await FlutterDetector.detectFromProject(projectPath);
 
       if (projectInfo.sdkConstraint != null) {
-        // Parse SDK constraint (e.g., ">=3.0.0 <4.0.0")
+        // Parse SDK constraint (e.g., ">=3.0.0 <4.0.0" or "^3.5.3")
         final constraint = projectInfo.sdkConstraint!;
-        final match = RegExp(r'>=?(\d+\.\d+)').firstMatch(constraint);
 
-        if (match != null) {
-          final minVersion = match.group(1)!;
+        // Extract minimum version from constraint
+        String? minVersion;
 
-          // Find the closest compatible version from version map
+        // Handle caret syntax (^3.5.3)
+        if (constraint.startsWith('^')) {
+          minVersion = constraint.substring(1).split(' ').first;
+        }
+        // Handle >= syntax (>=3.0.0)
+        else {
+          final match =
+              RegExp(r'>=?(\d+\.\d+(?:\.\d+)?)').firstMatch(constraint);
+          if (match != null) {
+            minVersion = match.group(1);
+          }
+        }
+
+        if (minVersion != null) {
+          logger.info('📋 Dart SDK constraint: $constraint (min: $minVersion)');
+
+          // Parse the minimum version
+          final parts = minVersion.split('.');
+          final majorMinor = '${parts[0]}.${parts.length > 1 ? parts[1] : '0'}';
+
           await loadVersionMap();
           final versions = getAvailableVersions();
 
+          // Try to find the best matching Flutter version
+          // Flutter 3.24+ supports Dart SDK 3.5.x
+          // Flutter 3.22+ supports Dart SDK 3.4.x
+          // Flutter 3.19+ supports Dart SDK 3.3.x
+
+          // First, try exact major.minor match
           for (final version in versions) {
-            if (version.startsWith(minVersion)) {
+            if (version == majorMinor) {
+              logger.info('✅ Found exact match: Flutter $version');
               return version;
             }
           }
 
-          // If exact match not found, get the latest compatible version
+          // Try to find closest compatible version (higher or equal)
+          final minNum = double.tryParse(majorMinor) ?? 0;
+          String? bestMatch;
+
           for (final version in versions) {
             final versionNum = double.tryParse(version) ?? 0;
-            final minNum = double.tryParse(minVersion) ?? 0;
 
             if (versionNum >= minNum) {
-              return version;
+              if (bestMatch == null) {
+                bestMatch = version;
+              } else {
+                final bestNum = double.tryParse(bestMatch) ?? 0;
+                // Pick the closest version that's still >= minNum
+                if (versionNum < bestNum) {
+                  bestMatch = version;
+                }
+              }
             }
+          }
+
+          if (bestMatch != null) {
+            logger.info('✅ Best compatible version: Flutter $bestMatch');
+            return bestMatch;
+          }
+
+          // If no compatible version found, suggest the latest
+          if (versions.isNotEmpty) {
+            logger.warn('⚠️  No exact match found, suggesting latest version');
+            return versions.first; // Already sorted descending
           }
         }
       }
@@ -154,43 +200,109 @@ class FlutterInstaller {
     return null;
   }
 
+  /// Resolve Flutter version to full stable version
+  Future<String> resolveToStableVersion(String version) async {
+    // If already a full version (e.g., 3.24.5), return as is
+    if (version.split('.').length >= 3) {
+      return version;
+    }
+
+    // Load version map if not already loaded
+    if (versionMap.isEmpty) {
+      await loadVersionMap();
+    }
+
+    // Check if we have a stable_version mapping in version_map.yaml
+    final versionDetails = versionMap[version];
+    if (versionDetails != null && versionDetails['stable_version'] != null) {
+      return versionDetails['stable_version'] as String;
+    }
+
+    // Fallback: Try to get from FVM releases
+    try {
+      final result = await ProcessRunner.run(
+        'fvm',
+        ['releases'],
+        runInShell: true,
+      );
+
+      if (result.success) {
+        // Parse FVM releases output to find matching stable version
+        final lines = result.stdout.split('\n');
+        final matchingVersions = lines
+            .where((line) => line.contains(version) && line.contains('stable'))
+            .toList();
+
+        if (matchingVersions.isNotEmpty) {
+          // Extract version number from first match
+          final match =
+              RegExp(r'(\d+\.\d+\.\d+)').firstMatch(matchingVersions.first);
+          if (match != null) {
+            return match.group(1)!;
+          }
+        }
+      }
+    } catch (e) {
+      logger.warn('⚠️  Could not query FVM releases: $e');
+    }
+
+    // Final fallback: add .0 to make it a full version
+    logger.warn('⚠️  No stable version found for $version, using ${version}.0');
+    return '$version.0';
+  }
+
   /// Install Flutter version using FVM
   Future<bool> installWithFvm(String version) async {
-    logger.info('🔄 Installing Flutter $version using FVM...');
+    // Resolve to full stable version
+    final fullVersion = await resolveToStableVersion(version);
 
-    final progress = logger.progress('Downloading Flutter $version');
+    if (fullVersion != version) {
+      logger.info('📌 Resolved $version → $fullVersion');
+    }
+
+    logger.info('🔄 Installing Flutter $fullVersion using FVM...');
+
+    final progress = logger.progress('Downloading Flutter $fullVersion');
 
     final result = await ProcessRunner.run(
       'fvm',
-      ['install', version],
+      ['install', fullVersion],
       runInShell: true,
     );
 
     progress.complete();
 
     if (result.success) {
-      logger.success('✅ Flutter $version installed successfully');
+      logger.success('✅ Flutter $fullVersion installed successfully');
       return true;
     } else {
-      logger.err('❌ Failed to install Flutter $version');
+      logger.err('❌ Failed to install Flutter $fullVersion');
       logger.err(result.stderr);
+
+      // Suggest trying with explicit version
+      logger.info('💡 FVM requires full version numbers (e.g., 3.24.5)');
+      logger.info('   Try: fvm releases | grep $version');
+
       return false;
     }
   }
 
   /// Use specific Flutter version in a project with FVM
   Future<bool> useVersionInProject(String projectPath, String version) async {
-    logger.info('🔧 Setting Flutter $version for project...');
+    // Resolve to full stable version
+    final fullVersion = await resolveToStableVersion(version);
+
+    logger.info('🔧 Setting Flutter $fullVersion for project...');
 
     final result = await ProcessRunner.run(
       'fvm',
-      ['use', version],
+      ['use', fullVersion],
       workingDirectory: projectPath,
       runInShell: true,
     );
 
     if (result.success) {
-      logger.success('✅ Project configured to use Flutter $version');
+      logger.success('✅ Project configured to use Flutter $fullVersion');
       logger.info('💡 Run: fvm flutter run');
       return true;
     } else {
@@ -256,8 +368,24 @@ class FlutterInstaller {
       if (doctorResult.success || doctorResult.exitCode == 0) {
         logger.success('✅ Flutter SDK setup complete');
         logger.info('');
-        logger.info('💡 To use this version, add to PATH:');
-        logger.info('   export PATH="$flutterDir/bin:\$PATH"');
+
+        // Auto-configure PATH
+        final configured = await _configurePathForStandalone(flutterDir);
+
+        if (configured) {
+          logger.success('✅ PATH configured automatically');
+          logger.info('💡 Restart your terminal or run:');
+          if (Platform.isMacOS || Platform.isLinux) {
+            final shellConfig = _getShellConfigFile();
+            logger.info('   source ~/$shellConfig');
+          } else {
+            logger.info('   Restart your terminal');
+          }
+        } else {
+          logger.info('💡 To use this version, add to PATH manually:');
+          logger.info('   export PATH="$flutterDir/bin:\$PATH"');
+        }
+
         return true;
       } else {
         logger
@@ -268,6 +396,99 @@ class FlutterInstaller {
       logger.err('❌ Failed to clone Flutter: ${result.stderr}');
       return false;
     }
+  }
+
+  /// Auto-configure PATH for standalone Flutter installation
+  Future<bool> _configurePathForStandalone(String flutterDir) async {
+    try {
+      final home =
+          Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+      if (home == null) return false;
+
+      if (Platform.isMacOS || Platform.isLinux) {
+        // Determine shell config file
+        final shellConfigFile = _getShellConfigFile();
+        final configPath = p.join(home, shellConfigFile);
+
+        // Read existing config
+        final configFile = File(configPath);
+        String existingContent = '';
+
+        if (configFile.existsSync()) {
+          existingContent = await configFile.readAsString();
+        }
+
+        // Check if PATH already configured
+        final flutterBinPath = '$flutterDir/bin';
+        if (existingContent.contains(flutterBinPath)) {
+          logger.info('ℹ️  PATH already configured in ~/$shellConfigFile');
+          return true;
+        }
+
+        // Add FlutterFix managed Flutter paths section
+        final pathExport =
+            '\n# FlutterFix managed Flutter versions\nexport PATH="$flutterBinPath:\$PATH"\n';
+
+        await configFile.writeAsString(
+          existingContent + pathExport,
+          mode: FileMode.append,
+        );
+
+        logger.info('✅ Updated ~/$shellConfigFile');
+        return true;
+      } else if (Platform.isWindows) {
+        // Windows: Update User PATH environment variable
+        final result = await ProcessRunner.run(
+          'powershell',
+          [
+            '-Command',
+            '''
+            \$oldPath = [Environment]::GetEnvironmentVariable('Path', 'User');
+            \$newPath = "$flutterDir\\bin";
+            if (\$oldPath -notlike "*\$newPath*") {
+              [Environment]::SetEnvironmentVariable('Path', "\$oldPath;\$newPath", 'User');
+              Write-Output 'PATH updated';
+            } else {
+              Write-Output 'PATH already configured';
+            }
+            '''
+          ],
+          runInShell: true,
+        );
+
+        if (result.success) {
+          logger.info('✅ Updated Windows PATH environment variable');
+          return true;
+        }
+      }
+    } catch (e) {
+      logger.warn('⚠️  Could not auto-configure PATH: $e');
+    }
+
+    return false;
+  }
+
+  /// Detect shell config file based on current shell
+  String _getShellConfigFile() {
+    final shell = Platform.environment['SHELL'] ?? '';
+
+    if (shell.contains('zsh')) {
+      return '.zshrc';
+    } else if (shell.contains('bash')) {
+      // Check if .bash_profile or .bashrc exists
+      final home = Platform.environment['HOME'];
+      if (home != null) {
+        if (File(p.join(home, '.bash_profile')).existsSync()) {
+          return '.bash_profile';
+        }
+      }
+      return '.bashrc';
+    } else if (shell.contains('fish')) {
+      return '.config/fish/config.fish';
+    }
+
+    // Default to .profile for unknown shells
+    return '.profile';
   }
 
   /// List installed Flutter versions (FVM)
