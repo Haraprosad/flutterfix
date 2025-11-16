@@ -80,7 +80,7 @@ class GradleDetector {
 
     // Try different patterns
     final patterns = [
-      RegExp(r"com\.android\.tools\.build:gradle:(['\" "]?)(\d+\.\d+\.\d+)\1"),
+      RegExp(r'''com\.android\.tools\.build:gradle:(['"])(\ d+\.\d+\.\d+)\1'''),
       RegExp(r'id\s*["'
           ']com\.android\.application["'
           ']\s+version\s+["'
@@ -107,9 +107,9 @@ class GradleDetector {
 
     // Try different patterns
     final patterns = [
-      RegExp(r"ext\.kotlin_version\s*=\s*(['\" "])(\d+\.\d+\.\d+)\1"),
+      RegExp(r'''ext\.kotlin_version\s*=\s*(['"])(\d+\.\d+\.\d+)\1'''),
       RegExp(
-          r'kotlin\(["' ']jvm["' ']\)\s+version\s+["' '](\d+\.\d+\.\d+)["' ']'),
+          r'kotlin(["' ']jvm["' '])\s+version\s+["' '](\d+\.\d+\.\d+)["' ']'),
       RegExp(r'org\.jetbrains\.kotlin:kotlin-gradle-plugin:(\d+\.\d+\.\d+)'),
     ];
 

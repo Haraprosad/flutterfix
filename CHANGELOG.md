@@ -1,3 +1,22 @@
+## 1.2.2
+
+### 📈 Pub Points Improvement (130 → 160 points)
+
+* **Added example/** - Created comprehensive example demonstrating all FlutterFix commands (+10 points)
+* **Fixed regex syntax** - Corrected invalid regular expression patterns in gradle_detector.dart (+10 points)
+  - Fixed AGP version detection regex
+  - Fixed Kotlin version detection regex
+* **Updated dependencies** - Upgraded to latest stable versions (+10 points)
+  - `mason_logger`: ^0.2.0 → ^0.3.0
+  - `process_run`: ^0.14.0 → ^1.0.0
+
+### ✅ Quality Improvements
+
+* Zero analyzer errors, warnings, or lints
+* All 64 tests passing
+* Example demonstrates real-world usage patterns
+* Full compatibility with latest dependencies
+
 ## 1.2.1
 
 ### 🐛 Bug Fixes
