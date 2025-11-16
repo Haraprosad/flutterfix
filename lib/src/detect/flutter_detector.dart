@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:yaml/yaml.dart';
 import '../runner/process_runner.dart';
 import '../utils/file_utils.dart';
@@ -61,8 +62,21 @@ class FlutterDetector {
     }
 
     try {
-      // Parse JSON output
+      // Try parsing JSON output (modern Flutter versions)
       final output = result.stdout;
+      if (output.startsWith('{')) {
+        final json = jsonDecode(output) as Map<String, dynamic>;
+        return FlutterInfo(
+          version: json['flutterVersion'] as String?,
+          dartVersion: json['dartSdkVersion'] as String?,
+          channel: json['channel'] as String?,
+          frameworkRevision: json['frameworkRevision'] as String?,
+          engineRevision: json['engineRevision'] as String?,
+          isInstalled: true,
+        );
+      }
+      
+      // Fallback: parse text output
       final versionMatch =
           RegExp(r'Flutter\s+(\d+\.\d+\.\d+)').firstMatch(output);
       final dartMatch = RegExp(r'Dart\s+(\d+\.\d+\.\d+)').firstMatch(output);
