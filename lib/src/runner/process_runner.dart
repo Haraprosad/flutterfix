@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 class ProcessResult {
   final int exitCode;
@@ -24,20 +25,34 @@ class ProcessRunner {
     String? workingDirectory,
     Map<String, String>? environment,
     bool runInShell = false,
+    Duration? timeout,
   }) async {
     try {
-      final result = await Process.run(
+      final ioResult = await Process.run(
         executable,
         arguments,
         workingDirectory: workingDirectory,
         environment: environment,
         runInShell: runInShell,
+      ).timeout(
+        timeout ?? const Duration(hours: 2), // Default 2 hour timeout
+        onTimeout: () {
+          throw TimeoutException(
+            'Process timed out after ${timeout?.inMinutes ?? 120} minutes',
+          );
+        },
       );
 
       return ProcessResult(
-        exitCode: result.exitCode,
-        stdout: result.stdout.toString().trim(),
-        stderr: result.stderr.toString().trim(),
+        exitCode: ioResult.exitCode,
+        stdout: ioResult.stdout.toString().trim(),
+        stderr: ioResult.stderr.toString().trim(),
+      );
+    } on TimeoutException catch (e) {
+      return ProcessResult(
+        exitCode: -1,
+        stdout: '',
+        stderr: 'Timeout: ${e.message}',
       );
     } catch (e) {
       return ProcessResult(

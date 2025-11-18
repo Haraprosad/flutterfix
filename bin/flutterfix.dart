@@ -24,6 +24,11 @@ void main(List<String> arguments) async {
             'fix-dependencies',
             negatable: false,
             help: 'Automatically fix Dart package dependency conflicts',
+          )
+          ..addFlag(
+            'auto-fix',
+            negatable: false,
+            help: 'Auto-apply dependency fixes without prompting (for CI/CD)',
           ))
     ..addCommand('upgrade')
     ..addCommand(
@@ -105,7 +110,14 @@ void main(List<String> arguments) async {
       exit(0);
     }
 
-    final projectPath = results['path'] as String;
+    // Support both --path flag and positional argument
+    String projectPath = results['path'] as String;
+
+    // If rest arguments exist, use the first one as project path
+    if (results.rest.isNotEmpty) {
+      projectPath = results.rest.first;
+    }
+
     final logger = Logger();
 
     // Validate project path
@@ -134,6 +146,11 @@ Future<void> _executeCommand(
   String projectPath,
   Logger logger,
 ) async {
+  // Support positional argument for project path in subcommands
+  if (command.rest.isNotEmpty) {
+    projectPath = command.rest.first;
+  }
+
   switch (command.name) {
     case 'doctor':
       final doctorCmd = DoctorCommand(logger, projectPath);
@@ -147,6 +164,7 @@ Future<void> _executeCommand(
         useOriginal: command['original'] as bool,
         autoInstallFlutter: command['install-flutter'] as bool,
         fixDependencies: command['fix-dependencies'] as bool,
+        autoApplyFixes: command['auto-fix'] as bool,
       );
       await syncCmd.execute();
       break;
@@ -189,7 +207,7 @@ Future<void> _executeCommand(
 void _printHelp(ArgParser parser) {
   print('''
 ╔═══════════════════════════════════════════╗
-║       🔧 FlutterFix v1.0.0 🔧             ║
+║       🔧 FlutterFix v1.3.0 🔧             ║
 ║   Auto-fix Flutter Build Errors           ║
 ╚═══════════════════════════════════════════╝
 
@@ -259,7 +277,7 @@ https://github.com/haraprosad/flutterfix
 }
 
 void _printVersion() {
-  print('FlutterFix v1.0.0');
+  print('FlutterFix v1.3.0');
   print('A professional Flutter project repair tool');
   print('https://github.com/haraprosad/flutterfix');
 }

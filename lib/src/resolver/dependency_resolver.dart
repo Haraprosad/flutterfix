@@ -25,12 +25,16 @@ class DependencyConflict {
   final String currentVersion;
   final String conflictingDependency;
   final String requiredVersion;
+  bool isDirectDependency;
+  List<String> dependentPackages;
 
   DependencyConflict({
     required this.package,
     required this.currentVersion,
     required this.conflictingDependency,
     required this.requiredVersion,
+    this.isDirectDependency = false,
+    this.dependentPackages = const [],
   });
 
   @override
@@ -144,6 +148,107 @@ class DependencyResolver {
     }
   }
 
+  /// Finds the minimum Flutter version that resolves the given conflicts
+  Future<String?> findMinimumCompatibleFlutterVersion(
+    List<DependencyConflict> conflicts,
+  ) async {
+    try {
+      // Query Flutter releases from GitHub API
+      final response = await http.get(
+        Uri.parse('https://api.github.com/repos/flutter/flutter/releases'),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      );
+
+      if (response.statusCode != 200) {
+        logger.warn('Failed to query Flutter releases');
+        return null;
+      }
+
+      final releases = jsonDecode(response.body) as List<dynamic>;
+
+      // Filter to stable releases only and sort by version
+      final stableReleases = <Map<String, dynamic>>[];
+      for (final release in releases) {
+        final releaseMap = release as Map<String, dynamic>;
+        final tagName = releaseMap['tag_name'] as String?;
+        final prerelease = releaseMap['prerelease'] as bool?;
+
+        if (tagName != null &&
+            prerelease == false &&
+            !tagName.contains('beta')) {
+          // Extract version number (e.g., "3.24.5" from "v3.24.5" or "3.24.5")
+          final versionMatch = RegExp(r'v?(\d+\.\d+\.\d+)').firstMatch(tagName);
+          if (versionMatch != null) {
+            releaseMap['version'] = versionMatch.group(1);
+            stableReleases.add(releaseMap);
+          }
+        }
+      }
+
+      // Sort releases by version (newest first)
+      stableReleases.sort((a, b) {
+        final versionA = a['version'] as String;
+        final versionB = b['version'] as String;
+        return _compareVersions(versionB, versionA);
+      });
+
+      // For each conflict, check which Flutter version provides compatible packages
+      // We need a version that has Dart SDK 3.6+ for collection 1.19.0 support
+      for (final release in stableReleases) {
+        final flutterVersion = release['version'] as String;
+        final parts = flutterVersion.split('.');
+
+        if (parts.isEmpty) continue;
+
+        final major = int.tryParse(parts[0]) ?? 0;
+        final minor = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
+
+        // Flutter 3.27+ uses Dart 3.6+ which has collection 1.19.0
+        // This resolves most SDK pinning conflicts
+        if (major >= 3 && minor >= 27) {
+          return flutterVersion;
+        }
+      }
+
+      // If no suitable version found in recent releases, recommend latest stable
+      if (stableReleases.isNotEmpty) {
+        return stableReleases.first['version'] as String?;
+      }
+
+      return null;
+    } catch (e) {
+      logger.err('Error finding compatible Flutter version: $e');
+      return null;
+    }
+  }
+
+  /// Gets the current Flutter version
+  Future<String?> getCurrentFlutterVersion() async {
+    try {
+      final command = _usesFvm()
+          ? 'fvm flutter --version --machine'
+          : 'flutter --version --machine';
+      final result = await Process.run(
+        'sh',
+        ['-c', command],
+        workingDirectory: projectPath,
+      );
+
+      if (result.exitCode != 0) return null;
+
+      final output = result.stdout.toString();
+      if (output.startsWith('{')) {
+        final json = jsonDecode(output) as Map<String, dynamic>;
+        return json['flutterVersion'] as String?;
+      }
+
+      return null;
+    } catch (e) {
+      logger.detail('Error getting Flutter version: $e');
+      return null;
+    }
+  }
+
   /// Finds a compatible version for a package that works with the current SDK
   Future<String?> findCompatibleVersion(
     String packageName,
@@ -171,6 +276,11 @@ class DependencyResolver {
         return _compareVersions(versionB, versionA);
       });
 
+      // Determine the collection version constraint based on Flutter/Dart SDK
+      // Flutter 3.24.x uses collection 1.18.0
+      // Flutter 3.27+ uses collection 1.19.0
+      final collectionMaxVersion = _getCollectionMaxVersion(dartSdkVersion);
+
       // Find the highest version that is compatible with current Dart SDK
       // and doesn't have conflicting dependencies
       for (final versionData in versions) {
@@ -190,26 +300,24 @@ class DependencyResolver {
 
         // Check if this version's dependencies conflict with Flutter SDK pinned packages
         final dependencies = pubspec['dependencies'] as Map<String, dynamic>?;
+        bool hasIncompatibleDeps = false;
+
         if (dependencies != null) {
           // Check for collection dependency (commonly pinned by flutter_test)
           final collectionDep = dependencies['collection'];
           if (collectionDep is String) {
-            // Parse the collection constraint
-            // Flutter 3.24.5 has collection 1.18.0
-            // If package requires ^1.19.0, it's incompatible
-            if (collectionDep.startsWith('^1.19') ||
-                collectionDep.startsWith('>=1.19') ||
-                collectionDep.contains('^1.19.') ||
-                collectionDep.contains('>=1.19.')) {
+            // Check if collection requirement is higher than what SDK provides
+            if (!_collectionSatisfiesConstraint(
+                collectionMaxVersion, collectionDep)) {
               logger.detail(
-                'Skipping $packageName $version: requires collection $collectionDep (incompatible with Flutter SDK collection 1.18.0)',
+                'Skipping $packageName $version: requires collection $collectionDep (incompatible with SDK collection $collectionMaxVersion)',
               );
-              continue;
+              hasIncompatibleDeps = true;
             }
-            // ^1.15.0, ^1.16.0, ^1.17.0, ^1.18.0 are all compatible with 1.18.0
-            // So we only skip versions requiring 1.19+
           }
         }
+
+        if (hasIncompatibleDeps) continue;
 
         logger.detail(
           'Found compatible version: $packageName $version (SDK: $sdkConstraint)',
@@ -223,6 +331,49 @@ class DependencyResolver {
       logger.err('Error finding compatible version for $packageName: $e');
       return null;
     }
+  }
+
+  /// Gets the maximum collection version for a given Dart SDK version
+  String _getCollectionMaxVersion(String dartSdkVersion) {
+    // Dart 3.5.x (Flutter 3.24.x) uses collection 1.18.0
+    // Dart 3.6.x+ (Flutter 3.27+) uses collection 1.19.0
+    final parts = dartSdkVersion.split('.');
+    if (parts.isEmpty) return '1.18.0';
+
+    final minor = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
+
+    // Dart 3.6+ uses collection 1.19.0
+    if (minor >= 6) return '1.19.0';
+
+    // Dart 3.5 and earlier uses collection 1.18.0
+    return '1.18.0';
+  }
+
+  /// Checks if a collection version satisfies the required constraint
+  bool _collectionSatisfiesConstraint(
+      String availableVersion, String constraint) {
+    // Remove caret and get base version
+    final cleanConstraint =
+        constraint.replaceAll('^', '').replaceAll('>=', '').trim();
+    final constraintParts = cleanConstraint.split(' ')[0].split('.');
+
+    if (constraintParts.isEmpty) return true;
+
+    // Get minimum required version
+    final minMinor =
+        int.tryParse(constraintParts.length > 1 ? constraintParts[1] : '0') ??
+            0;
+    final availableParts = availableVersion.split('.');
+    final availableMinor =
+        int.tryParse(availableParts.length > 1 ? availableParts[1] : '0') ?? 0;
+
+    // Check if constraint requires a newer version than available
+    if (constraint.startsWith('^') || constraint.startsWith('>=')) {
+      // For ^1.19.0 or >=1.19.0, we need at least 1.19.0
+      return availableMinor >= minMinor;
+    }
+
+    return true;
   }
 
   /// Checks if a Dart SDK version satisfies a version constraint
@@ -301,5 +452,80 @@ class DependencyResolver {
     }
 
     return 0;
+  }
+
+  /// Checks if a package is a direct dependency in pubspec.yaml
+  Future<bool> isDirectDependency(String packageName) async {
+    try {
+      final pubspecPath = p.join(projectPath, 'pubspec.yaml');
+      final content = await File(pubspecPath).readAsString();
+
+      // Check in dependencies and dev_dependencies sections
+      final dependencyPattern = RegExp(
+        r'^\s+' + packageName + r'\s*:',
+        multiLine: true,
+      );
+
+      return dependencyPattern.hasMatch(content);
+    } catch (e) {
+      logger.detail('Error checking if $packageName is direct dependency: $e');
+      return false;
+    }
+  }
+
+  /// Finds which packages depend on the given package
+  Future<List<String>> findDependentPackages(String packageName) async {
+    try {
+      final command = _usesFvm()
+          ? 'fvm flutter pub deps --json'
+          : 'flutter pub deps --json';
+      final result = await Process.run(
+        'sh',
+        ['-c', command],
+        workingDirectory: projectPath,
+      );
+
+      if (result.exitCode != 0) {
+        return [];
+      }
+
+      final output = result.stdout.toString();
+      final data = jsonDecode(output) as Map<String, dynamic>;
+      final packages = data['packages'] as List<dynamic>?;
+
+      if (packages == null) return [];
+
+      final dependents = <String>[];
+
+      for (final pkg in packages) {
+        final pkgMap = pkg as Map<String, dynamic>;
+        final dependencies = pkgMap['dependencies'] as List<dynamic>?;
+
+        if (dependencies != null) {
+          for (final dep in dependencies) {
+            if (dep == packageName) {
+              final name = pkgMap['name'] as String?;
+              if (name != null && name != packageName) {
+                dependents.add(name);
+              }
+            }
+          }
+        }
+      }
+
+      return dependents;
+    } catch (e) {
+      logger.detail('Error finding dependents of $packageName: $e');
+      return [];
+    }
+  }
+
+  /// Analyzes conflicts to determine if they are direct or transitive
+  Future<void> analyzeConflicts(List<DependencyConflict> conflicts) async {
+    for (final conflict in conflicts) {
+      conflict.isDirectDependency = await isDirectDependency(conflict.package);
+      conflict.dependentPackages =
+          await findDependentPackages(conflict.package);
+    }
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:convert';
+import 'dart:async';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 import '../runner/process_runner.dart';
@@ -213,8 +215,12 @@ class FlutterInstaller {
   Future<bool> installFvm() async {
     logger.info('📦 Installing FVM (Flutter Version Management)...');
 
+    final progress = logger.progress('Installing FVM via dart pub global');
+
     final result =
         await ProcessRunner.dart(['pub', 'global', 'activate', 'fvm']);
+
+    progress.complete();
 
     if (result.success) {
       logger.success('✅ FVM installed successfully');
@@ -223,6 +229,110 @@ class FlutterInstaller {
       logger.err('❌ Failed to install FVM: ${result.stderr}');
       return false;
     }
+  }
+
+  /// Install Flutter showing real FVM output
+  Future<ProcessResult> _installWithProgress(String version) async {
+    try {
+      logger.info('📡 Starting FVM download process...');
+      logger.info('💡 Showing real-time FVM output:');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+      final process = await Process.start(
+        'fvm',
+        ['install', version, '--verbose'],
+        runInShell: true,
+      );
+
+      final stdoutBuffer = StringBuffer();
+      final stderrBuffer = StringBuffer();
+      var lastOutputTime = DateTime.now();
+      var hasOutput = false;
+
+      // Show a simple "waiting for output" indicator initially
+      Progress? waitingProgress = logger.progress('Waiting for FVM output...');
+
+      // Listen to stdout and show real FVM output
+      process.stdout.transform(utf8.decoder).listen((data) {
+        stdoutBuffer.write(data);
+        hasOutput = true;
+        lastOutputTime = DateTime.now();
+
+        // Cancel waiting progress and show real output
+        waitingProgress?.cancel();
+        waitingProgress = null;
+
+        // Print real FVM output directly to console
+        stdout.write(data);
+      });
+
+      // Listen to stderr and show real FVM output
+      process.stderr.transform(utf8.decoder).listen((data) {
+        stderrBuffer.write(data);
+        hasOutput = true;
+        lastOutputTime = DateTime.now();
+
+        // Cancel waiting progress and show real output
+        waitingProgress?.cancel();
+        waitingProgress = null;
+
+        // Print real FVM stderr output (often contains progress info)
+        stderr.write(data);
+      });
+
+      // Monitor for lack of output (possible hang)
+      final monitorTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+        final now = DateTime.now();
+        if (hasOutput && now.difference(lastOutputTime).inSeconds > 60) {
+          print(
+              '\n⚠️  No output from FVM for 60 seconds, process may be stuck...');
+          print('💡 You can press Ctrl+C to cancel if needed');
+        }
+      });
+
+      // Wait for process to complete with timeout
+      final exitCode = await process.exitCode.timeout(
+        const Duration(minutes: 30),
+        onTimeout: () {
+          monitorTimer.cancel();
+          waitingProgress?.cancel();
+          process.kill();
+          return -1;
+        },
+      );
+
+      monitorTimer.cancel();
+      waitingProgress?.cancel();
+
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.info('📡 FVM process completed');
+
+      return ProcessResult(
+        exitCode: exitCode,
+        stdout: stdoutBuffer.toString(),
+        stderr: stderrBuffer.toString(),
+      );
+    } catch (e) {
+      return ProcessResult(
+        exitCode: -1,
+        stdout: '',
+        stderr: 'Error starting FVM process: $e',
+      );
+    }
+  }
+
+  /// Check if specific Flutter version is installed with FVM
+  Future<bool> isVersionInstalled(String version) async {
+    final result = await ProcessRunner.run(
+      'fvm',
+      ['list'],
+      runInShell: true,
+    );
+
+    if (result.success) {
+      return result.stdout.contains(version);
+    }
+    return false;
   }
 
   /// Get list of available Flutter versions from version map
@@ -327,11 +437,131 @@ class FlutterInstaller {
     return null;
   }
 
-  /// Resolve Flutter version to full stable version
+  /// Resolve Flutter version to FVM-compatible format
   Future<String> resolveToStableVersion(String version) async {
-    // If already a full version (e.g., 3.24.5), return as is
-    if (version.split('.').length >= 3) {
-      return version;
+    // Query FVM releases to find exact matching version
+    logger.detail('🔍 Querying FVM for version: $version');
+
+    try {
+      final result = await ProcessRunner.run(
+        'fvm',
+        ['releases'],
+        runInShell: true,
+        timeout: const Duration(seconds: 30),
+      );
+
+      if (result.success) {
+        final lines = result.stdout.split('\n');
+        final allVersions = <String>[];
+
+        // Collect all available versions from FVM output
+        for (final line in lines) {
+          final cleanLine = line.trim();
+          if (cleanLine.isEmpty) continue;
+
+          // Extract version from the line (handles v1.0.0, 1.17.0, 1.5.4-hotfix.2, etc.)
+          final versionMatch = RegExp(r'(?:v)?(\d+\.\d+\.\d+(?:[+\-][\w.]+)?)')
+              .firstMatch(cleanLine);
+          if (versionMatch != null) {
+            final extractedVersion = versionMatch.group(1)!;
+            // Also add with 'v' prefix if it was present in original
+            if (cleanLine.contains('v$extractedVersion')) {
+              allVersions.add('v$extractedVersion');
+            }
+            allVersions.add(extractedVersion);
+          }
+        }
+
+        // Remove duplicates
+        final uniqueVersions = allVersions.toSet().toList();
+
+        // Strategy 1: Exact match (without v prefix)
+        if (uniqueVersions.contains(version)) {
+          logger.detail('✓ Found exact FVM version: $version');
+          return version;
+        }
+
+        // Strategy 2: Exact match with v prefix
+        if (uniqueVersions.contains('v$version')) {
+          logger.detail('✓ Found FVM version: v$version');
+          return 'v$version';
+        }
+
+        // Strategy 3: Try with -stable suffix (rare, but possible)
+        final stableVersion = '$version-stable';
+        if (uniqueVersions.contains(stableVersion)) {
+          logger.detail('✓ Found FVM version: $stableVersion');
+          return stableVersion;
+        }
+
+        // Strategy 4: Find best match (handles hotfix, beta, dev suffixes)
+        for (final fvmVersion in uniqueVersions) {
+          if (fvmVersion.startsWith(version) ||
+              fvmVersion.startsWith('v$version')) {
+            logger.detail('✓ Found similar FVM version: $fvmVersion');
+            logger.info('💡 Using $fvmVersion instead of $version');
+            return fvmVersion;
+          }
+        }
+
+        // Strategy 5: Partial match (e.g., "3.24" matches "3.24.5")
+        final versionParts = version.split('.');
+        if (versionParts.length == 2) {
+          // User provided major.minor, find latest patch
+          final majorMinor = '${versionParts[0]}.${versionParts[1]}';
+          final matchingVersions = uniqueVersions
+              .where((v) => v.replaceFirst('v', '').startsWith('$majorMinor.'))
+              .toList()
+            ..sort((a, b) => b.compareTo(a)); // Latest first
+
+          if (matchingVersions.isNotEmpty) {
+            final bestMatch = matchingVersions.first;
+            logger.detail('✓ Found best match: $bestMatch for $version');
+            logger.info('💡 Using latest patch version: $bestMatch');
+            return bestMatch;
+          }
+        }
+
+        // Strategy 6: Find nearest available version
+        logger.warn('⚠️  Exact version $version not found in FVM releases');
+
+        final nearestVersion = _findNearestVersion(version, uniqueVersions);
+        if (nearestVersion != null) {
+          logger.info('💡 Found nearest available version: $nearestVersion');
+          final shouldUse = logger.confirm(
+            'Would you like to use $nearestVersion instead of $version?',
+            defaultValue: true,
+          );
+
+          if (shouldUse) {
+            return nearestVersion;
+          }
+        }
+
+        logger.info('💡 Available versions close to $version:');
+
+        // Show similar versions to help user
+        final similarVersions = uniqueVersions
+            .where((v) =>
+                v.replaceFirst('v', '').contains(version.split('.').first))
+            .take(10)
+            .toList();
+
+        if (similarVersions.isNotEmpty) {
+          for (final v in similarVersions) {
+            logger.info('   - $v');
+          }
+        } else {
+          logger.info('💡 Run "fvm releases" to see all available versions');
+        }
+
+        throw Exception(
+          'Flutter version $version is not available in FVM.\n'
+          'Please choose from the versions listed above.',
+        );
+      }
+    } catch (e) {
+      logger.detail('⚠️  Failed to query FVM releases: $e');
     }
 
     // Load version map if not already loaded
@@ -342,40 +572,67 @@ class FlutterInstaller {
     // Check if we have a stable_version mapping in version_map.yaml
     final versionDetails = versionMap[version];
     if (versionDetails != null && versionDetails['stable_version'] != null) {
-      return versionDetails['stable_version'] as String;
+      final mappedVersion = versionDetails['stable_version'] as String;
+      logger.detail('✓ Found version map: $version → $mappedVersion');
+      return mappedVersion;
     }
 
-    // Fallback: Try to get from FVM releases
+    // If we reach here, version not found anywhere
+    throw Exception(
+      'Flutter version $version could not be resolved.\n'
+      'Run "fvm releases" to see available versions.',
+    );
+  }
+
+  /// Find the nearest available version in FVM releases
+  String? _findNearestVersion(
+      String targetVersion, List<String> availableVersions) {
     try {
-      final result = await ProcessRunner.run(
-        'fvm',
-        ['releases'],
-        runInShell: true,
-      );
+      // Parse target version (remove v prefix if present)
+      final cleanTarget = targetVersion.replaceFirst('v', '');
+      final targetParts = cleanTarget.split('.');
+      if (targetParts.length < 2) return null;
 
-      if (result.success) {
-        // Parse FVM releases output to find matching stable version
-        final lines = result.stdout.split('\n');
-        final matchingVersions = lines
-            .where((line) => line.contains(version) && line.contains('stable'))
-            .toList();
+      final targetMajor = int.tryParse(targetParts[0]);
+      final targetMinor = int.tryParse(targetParts[1]);
+      if (targetMajor == null || targetMinor == null) return null;
 
-        if (matchingVersions.isNotEmpty) {
-          // Extract version number from first match
-          final match =
-              RegExp(r'(\d+\.\d+\.\d+)').firstMatch(matchingVersions.first);
-          if (match != null) {
-            return match.group(1)!;
-          }
+      // Find versions with same major version
+      final sameMajor = availableVersions.where((v) {
+        final cleanV = v.replaceFirst('v', '');
+        final parts = cleanV.split('.');
+        if (parts.isEmpty) return false;
+        final major = int.tryParse(parts[0]);
+        return major == targetMajor;
+      }).toList();
+
+      if (sameMajor.isEmpty) return null;
+
+      // Find closest version
+      String? closest;
+      int minDiff = 999999;
+
+      for (final v in sameMajor) {
+        final cleanV = v.replaceFirst('v', '');
+        final parts = cleanV.split('.');
+        if (parts.length < 2) continue;
+
+        final major = int.tryParse(parts[0]);
+        final minor = int.tryParse(parts[1].split(RegExp(r'[+\-]')).first);
+        if (major == null || minor == null) continue;
+
+        final diff = (minor - targetMinor).abs();
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = v;
         }
       }
-    } catch (e) {
-      logger.warn('⚠️  Could not query FVM releases: $e');
-    }
 
-    // Final fallback: add .0 to make it a full version
-    logger.warn('⚠️  No stable version found for $version, using ${version}.0');
-    return '$version.0';
+      return closest;
+    } catch (e) {
+      logger.detail('Error finding nearest version: $e');
+      return null;
+    }
   }
 
   /// Install Flutter version using FVM
@@ -387,22 +644,44 @@ class FlutterInstaller {
       logger.info('📌 Resolved $version → $fullVersion');
     }
 
+    // Check if already installed first
+    final checkProgress =
+        logger.progress('Checking if Flutter $fullVersion is installed');
+    final alreadyInstalled = await isVersionInstalled(fullVersion);
+    checkProgress.complete();
+
+    if (alreadyInstalled) {
+      logger.info('✓ Flutter $fullVersion already installed');
+      return true;
+    }
+
+    logger.warn('⚠️  Flutter $fullVersion is not installed');
+    logger.info('📥 Starting download and installation...');
     logger.info('🔄 Installing Flutter $fullVersion using FVM...');
 
-    final progress = logger.progress('Downloading Flutter $fullVersion');
+    final result = await _installWithProgress(fullVersion);
 
-    final result = await ProcessRunner.run(
-      'fvm',
-      ['install', fullVersion],
-      runInShell: true,
-    );
+    // Check if installation actually completed even if process didn't exit cleanly
+    if (!result.success) {
+      logger
+          .warn('⚠️  FVM process exited with error, verifying installation...');
 
-    progress.complete();
+      // Wait a moment for FVM to finalize
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (result.success) {
-      logger.success('✅ Flutter $fullVersion installed successfully');
-      return true;
-    } else {
+      // Verify if version is actually installed
+      final verifyProgress =
+          logger.progress('Verifying Flutter $fullVersion installation');
+      final isNowInstalled = await isVersionInstalled(fullVersion);
+      verifyProgress.complete();
+
+      if (isNowInstalled) {
+        logger
+            .success('✅ Flutter $fullVersion download completed successfully');
+        logger.info('💡 Installation verified despite process warning');
+        return true;
+      }
+
       logger.err('❌ Failed to install Flutter $fullVersion');
       logger.err(result.stderr);
 
@@ -412,6 +691,9 @@ class FlutterInstaller {
 
       return false;
     }
+
+    logger.success('✅ Flutter $fullVersion download completed successfully');
+    return true;
   }
 
   /// Use specific Flutter version in a project with FVM
@@ -421,12 +703,49 @@ class FlutterInstaller {
 
     logger.info('🔧 Setting Flutter $fullVersion for project...');
 
+    // Check if version is already installed
+    final checkProgress =
+        logger.progress('Checking if Flutter $fullVersion is installed');
+    final isInstalled = await isVersionInstalled(fullVersion);
+    checkProgress.complete();
+
+    if (!isInstalled) {
+      logger.info('📥 Flutter $fullVersion not found, installing first...');
+      final installed = await installWithFvm(fullVersion);
+      if (!installed) {
+        logger.err('❌ Failed to install Flutter $fullVersion');
+        return false;
+      }
+    } else {
+      logger.info('✓ Flutter $fullVersion already installed');
+    }
+
+    // Pre-configure .gitignore to avoid interactive prompt
+    final gitignorePath = p.join(projectPath, '.gitignore');
+    try {
+      if (File(gitignorePath).existsSync()) {
+        final content = await File(gitignorePath).readAsString();
+        if (!content.contains('.fvm/')) {
+          await File(gitignorePath)
+              .writeAsString('$content\n# FVM Version Cache\n.fvm/\n');
+          logger.info('✓ Added .fvm/ to .gitignore');
+        }
+      }
+    } catch (e) {
+      // Non-critical, continue anyway
+    }
+
+    final progress =
+        logger.progress('Configuring project to use Flutter $fullVersion');
+
     final result = await ProcessRunner.run(
       'fvm',
-      ['use', fullVersion],
+      ['use', fullVersion, '--skip-setup', '--skip-pub-get', '--force'],
       workingDirectory: projectPath,
       runInShell: true,
     );
+
+    progress.complete();
 
     if (result.success) {
       logger.success('✅ Project configured to use Flutter $fullVersion');

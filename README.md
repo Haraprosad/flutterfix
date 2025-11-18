@@ -11,6 +11,10 @@
 
 ---
 
+> **⚡ Always use the latest version!** Run `flutterfix upgrade` regularly to get new features, bug fixes, and compatibility updates.
+
+---
+
 ## 🚀 Why FlutterFix?
 
 Ever cloned a Flutter project and spent hours debugging build errors?
@@ -19,6 +23,7 @@ Ever cloned a Flutter project and spent hours debugging build errors?
 ❌ The Android Gradle plugin supports only Kotlin Gradle plugin version 1.5.20 and higher.
 ❌ Unsupported class file major version 61
 ❌ java.lang.NoClassDefFoundError: Could not initialize class org.codehaus.groovy
+❌ Because project depends on upgrader >=5.0.0 which requires SDK version >=2.17.1, version solving failed
 ```
 
 **FlutterFix solves this in seconds.**
@@ -27,6 +32,9 @@ It automatically:
 - ✅ Detects incompatible Flutter/Gradle/Kotlin/Java versions
 - ✅ Updates configuration files with correct versions
 - ✅ Fixes Android SDK mismatches
+- ✅ **Auto-resolves Dart package dependency conflicts**
+- ✅ **Handles null safety boundary issues**
+- ✅ **Downgrades packages to compatible versions**
 - ✅ Cleans build caches
 - ✅ Makes any project buildable instantly
 
@@ -51,6 +59,24 @@ dart pub global activate --source path .
 ```bash
 flutterfix --version
 ```
+
+### 🔄 Keep FlutterFix Updated
+
+**Always use the latest version** for best results:
+
+```bash
+# Check for updates and upgrade
+flutterfix upgrade
+
+# Or manually
+dart pub global activate flutterfix
+```
+
+**Why update?**
+- 🆕 New Flutter version compatibility
+- 🐛 Bug fixes and improvements
+- ✨ New features (like dependency conflict resolution)
+- 🔧 Better error handling
 
 ---
 
@@ -207,16 +233,109 @@ flutterfix rollback --list
 # Restore specific backup by ID
 flutterfix rollback --id <backup-id>
 
-# Upgrade FlutterFix itself
+# 🆕 Upgrade FlutterFix to latest version
 flutterfix upgrade
 
 # Show help
 flutterfix --help
 ```
 
+**💡 Pro Tip:** Run `flutterfix upgrade` regularly to stay up-to-date with:
+- New Flutter version support
+- Bug fixes and performance improvements
+- New features and enhancements
+- Better error messages and handling
+
 ---
 
-### 🎓 Installation Modes Explained
+---
+
+## 🎓 For New Developers
+
+### First Time Using FlutterFix?
+
+**Complete Beginner's Workflow:**
+
+```bash
+# 1. Install FlutterFix globally
+dart pub global activate flutterfix
+
+# 2. Clone any Flutter project
+git clone <flutter-project-url>
+cd <project-folder>
+
+# 3. One command to fix everything
+flutterfix sync --original --install-flutter
+
+# 4. Run your app
+fvm flutter run
+```
+
+### Common Questions
+
+**Q: What does `--original` do?**
+A: Uses the Flutter version the project was originally created with (from `.metadata` file). This is the safest option for cloned projects.
+
+**Q: Do I need FVM installed?**
+A: No! FlutterFix will auto-install FVM for you, or use standalone mode if FVM installation fails.
+
+**Q: What if I get dependency errors?**
+A: Use `--fix-dependencies` flag:
+```bash
+flutterfix sync --original --install-flutter --fix-dependencies
+```
+
+**Q: Can I undo changes?**
+A: Yes! FlutterFix creates automatic backups:
+```bash
+flutterfix rollback --latest
+```
+
+**Q: How do I upgrade FlutterFix?**
+A: Simply run:
+```bash
+flutterfix upgrade
+```
+
+**Q: My project uses Flutter X.X but I want Flutter Y.Y?**
+A: Remove `--original` flag to use your current Flutter, or specify a version:
+```bash
+flutterfix install --version 3.24
+flutterfix sync
+```
+
+### Troubleshooting
+
+**Issue: "Flutter not found"**
+```bash
+# Solution: Install Flutter first
+flutterfix sync --original --install-flutter
+```
+
+**Issue: "pub get failed"**
+```bash
+# Solution: Fix dependencies
+flutterfix sync --fix-dependencies
+```
+
+**Issue: "Gradle build failed"**
+```bash
+# Solution: Clean and retry
+flutterfix sync
+fvm flutter clean
+fvm flutter pub get
+fvm flutter run
+```
+
+**Issue: "Wrong Flutter version"**
+```bash
+# Solution: Use --original to restore correct version
+flutterfix sync --original --install-flutter
+```
+
+---
+
+## 🎓 Installation Modes Explained
 
 FlutterFix supports two installation modes for Flutter:
 
@@ -419,12 +538,37 @@ flutterfix sync --original --install-flutter
 - Install specific versions manually
 - Supports Flutter 2.0.x to 3.38.x (all stable versions)
 
-### 7. Backup & Rollback System
+### 6. Backup & Rollback System
 - **Automatic backups** before any file modifications
 - Restore files to previous state with one command
 - List all available backups with timestamps
 - Clear old backups to save space
 - Backup metadata includes descriptions and timestamps
+
+### 7. Intelligent Dependency Resolution
+- **Auto-detects SDK version incompatibilities** (e.g., packages requiring newer Dart SDK)
+- **Smart package downgrading** to compatible versions
+- **Null safety boundary detection** - prevents breaking pre-null safety projects
+- **Multi-source version analysis** - uses .metadata, pubspec.yaml, and FVM config
+- **Conflict resolution strategies** with clear user guidance
+- **Package compatibility checking** via pub.dev API
+- Handles edge cases like missing .metadata or outdated SDK constraints
+
+**Example Scenarios Handled:**
+```bash
+# Scenario 1: Package requires newer SDK
+❌ upgrader >=5.0.0 requires SDK version >=2.17.1
+✅ FlutterFix auto-downgrades to upgrader 4.2.0 (compatible with current SDK)
+
+# Scenario 2: Null safety conflict
+❌ Project built with Flutter 1.22 (pre-null safety)
+❌ pubspec.yaml updated to require >=2.15.0 (null safety)
+✅ FlutterFix restores to Flutter 1.22, downgrades packages, keeps project working
+
+# Scenario 3: Missing .metadata
+❌ .metadata file deleted or corrupted
+✅ FlutterFix uses pubspec.yaml SDK constraint as fallback
+```
 
 ---
 
@@ -567,15 +711,57 @@ For more examples, see `examples/ci-cd/` directory.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+We welcome contributions from the Flutter community! FlutterFix is built to solve **real-world problems** that developers face daily.
 
-1. 🍴 Fork the repository
-2. 🔨 Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. 💾 Commit your changes (`git commit -m 'Add amazing feature'`)
-4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
-5. 🎉 Open a Pull Request
+### 🎯 How You Can Help
 
-### Development Setup
+#### 1. **Report Issues & Share Your Experience**
+- 🐛 Found a bug? [Create an issue](https://github.com/haraprosad/flutterfix/issues/new)
+- 💡 Have a feature idea? [Start a discussion](https://github.com/haraprosad/flutterfix/discussions)
+- 📝 Share your use case and how FlutterFix helped (or didn't help)
+
+#### 2. **Test & Provide Feedback**
+We need YOUR feedback to make FlutterFix battle-proof:
+
+- ✅ Test on different Flutter versions (1.22, 2.x, 3.x)
+- ✅ Test on various project types (new, legacy, cloned)
+- ✅ Test edge cases (missing .metadata, corrupted configs, etc.)
+- ✅ Test on different OS (macOS, Linux, Windows)
+
+**Please share:**
+- Flutter version you tested
+- Project type/structure
+- What worked ✅
+- What didn't work ❌
+- Unexpected behavior ⚠️
+
+#### 3. **Contribute Code**
+
+```bash
+# 1. Fork the repository
+# 2. Create a feature branch
+git checkout -b feature/amazing-feature
+
+# 3. Make your changes
+# 4. Add tests
+dart test
+
+# 5. Commit with clear message
+git commit -m 'Add: Auto-detect missing dependencies'
+
+# 6. Push to your fork
+git push origin feature/amazing-feature
+
+# 7. Open a Pull Request
+```
+
+#### 4. **Add Compatibility Data**
+Help us support more Flutter versions:
+- Test FlutterFix with different Flutter/Gradle/Kotlin combinations
+- Share working version configurations
+- Report version conflicts we haven't covered
+
+### 📋 Development Setup
 
 ```bash
 # Clone the repo
@@ -588,9 +774,80 @@ dart pub get
 # Run tests
 dart test
 
-# Activate locally
+# Test locally
 dart pub global activate --source path .
+flutterfix --version
 ```
+
+### 🎨 Areas We Need Help
+
+1. **Windows Support** - Test and improve Windows compatibility
+2. **Edge Cases** - Find and fix rare scenarios
+3. **Performance** - Optimize for large projects
+4. **Documentation** - Improve guides and examples
+5. **CI/CD Examples** - Add more pipeline examples
+6. **Error Messages** - Make them more helpful
+
+### 💬 Community Guidelines
+
+- Be respectful and constructive
+- Provide detailed bug reports with reproduction steps
+- Include Flutter/Dart/OS versions in issue reports
+- Test your changes before submitting PR
+- Follow existing code style
+
+---
+
+## 👨‍💻 Creator & Maintainer
+
+<div align="center">
+
+### **Haraprosad Biswas**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/haraprosadbiswas/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Haraprosad)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/haraprosad)
+
+*Flutter Developer | Open Source Contributor*
+
+**Let's connect and build better tools together!**
+
+</div>
+
+---
+
+## 🌟 Special Thanks
+
+### To Our Contributors
+
+Thank you to everyone who has contributed to making FlutterFix better:
+
+- 🐛 Bug reporters and testers
+- 💡 Feature requesters
+- 📝 Documentation improvers
+- 💻 Code contributors
+
+**Want to see your name here?** Contribute and help solve real-world Flutter problems!
+
+### To The Community
+
+- Flutter team for the amazing framework
+- FVM team for version management inspiration
+- All developers who tested and provided feedback
+- Open source community for support and ideas
+
+---
+
+## 🚀 Real-World Impact
+
+FlutterFix has helped developers:
+- ✅ Save hours of debugging time
+- ✅ Clone and run projects instantly
+- ✅ Maintain legacy projects easily
+- ✅ Onboard new team members faster
+- ✅ Fix build errors automatically
+
+**Share your success story!** Open a [discussion](https://github.com/haraprosad/flutterfix/discussions) and tell us how FlutterFix helped you.
 
 ---
 
@@ -608,11 +865,67 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## 📞 Support & Community
 
-- 📧 **Issues**: [GitHub Issues](https://github.com/haraprosad/flutterfix/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/haraprosad/flutterfix/discussions)
-- 🐦 **Twitter**: [@haraprosad](https://twitter.com/haraprosad)
+### Need Help?
+
+- 📧 **Issues**: [GitHub Issues](https://github.com/haraprosad/flutterfix/issues) - Report bugs or request features
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/haraprosad/flutterfix/discussions) - Ask questions, share ideas
+- 🐦 **Twitter**: [@haraprosad](https://twitter.com/haraprosad) - Follow for updates
+- 💼 **LinkedIn**: [Haraprosad Biswas](https://www.linkedin.com/in/haraprosadbiswas/) - Connect professionally
+
+### Quick Help
+
+**Before creating an issue, please:**
+1. ✅ Run `flutterfix upgrade` to ensure you have the latest version
+2. ✅ Check [existing issues](https://github.com/haraprosad/flutterfix/issues) for similar problems
+3. ✅ Include your Flutter version: `flutter --version`
+4. ✅ Include your FlutterFix version: `flutterfix --version`
+5. ✅ Provide the complete error message
+
+**Issue Template:**
+```
+**Environment:**
+- FlutterFix version: X.X.X
+- Flutter version: X.X.X
+- OS: macOS/Linux/Windows
+- Project type: New/Legacy/Cloned
+
+**Problem:**
+[Describe what went wrong]
+
+**Steps to reproduce:**
+1. ...
+2. ...
+
+**Expected behavior:**
+[What should happen]
+
+**Actual behavior:**
+[What actually happened]
+
+**Error output:**
+```
+[Paste complete error]
+```
+```
+
+---
+
+## 🔮 Roadmap
+
+### Planned Features
+
+- [ ] **Smart Package Resolution** - AI-powered dependency conflict resolution
+- [ ] **Project Health Score** - Analyze and rate project maintainability
+- [ ] **Multi-Project Support** - Fix multiple projects at once
+- [ ] **Custom Profiles** - Save and reuse configuration profiles
+- [ ] **Web Dashboard** - Visual project analysis and fixes
+- [ ] **VS Code Extension** - IDE integration for one-click fixes
+- [ ] **Docker Support** - Containerized Flutter environments
+- [ ] **Team Sync** - Share configurations across teams
+
+**Have a feature idea?** [Suggest it here!](https://github.com/haraprosad/flutterfix/discussions/new?category=ideas)
 
 ---
 
